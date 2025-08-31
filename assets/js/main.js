@@ -1,3 +1,206 @@
+// =============================================================================
+// CORRECTION SPÉCIFIQUE DU MENU - NE MODIFIE PAS LES AUTRES FONCTIONNALITÉS
+// =============================================================================
+
+console.log('Application de la correction menu...');
+
+// Surcharge sécurisée de la fonction menuManager
+const originalMenuManager = window.menuManager || {};
+
+const menuManagerCorrection = {
+    init: function() {
+        console.log('🔧 Correction menu initialisée');
+        
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        if (!tabBtns.length || !menuItems.length) {
+            console.log('❌ Éléments menu non trouvés');
+            return;
+        }
+
+        // Cacher tous les éléments sauf les entrées
+        menuItems.forEach(item => {
+            const category = item.getAttribute('data-category');
+            if (category === 'entrees') {
+                item.style.display = 'block';
+                setTimeout(() => item.classList.add('show'), 100);
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('show');
+            }
+        });
+
+        // Recréer les événements de clic
+        tabBtns.forEach(btn => {
+            // Supprimer les anciens événements
+            btn.replaceWith(btn.cloneNode(true));
+        });
+
+        // Recréer la référence après le clone
+        const newTabBtns = document.querySelectorAll('.tab-btn');
+        
+        newTabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleTabClick.call(btn);
+            });
+        });
+
+        // Activer le premier onglet
+        const firstTab = document.querySelector('.tab-btn[data-category="entrees"]');
+        if (firstTab) {
+            firstTab.classList.add('active');
+        }
+
+        console.log('✅ Menu corrigé:', menuItems.length, 'éléments');
+    },
+
+    handleTabClick: function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const category = this.getAttribute('data-category');
+        
+        console.log('📁 Catégorie sélectionnée:', category);
+
+        // Mettre à jour les onglets
+        tabBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        // Filtrer les éléments
+        menuItems.forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            
+            if (category === itemCategory) {
+                item.style.display = 'block';
+                setTimeout(() => item.classList.add('show'), 50);
+            } else {
+                item.classList.remove('show');
+                setTimeout(() => item.style.display = 'none', 300);
+            }
+        });
+    }
+};
+
+// Appliquer la correction après le chargement
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        menuManagerCorrection.init();
+        
+        // Solution de secours si le menu ne s'affiche toujours pas
+        setTimeout(() => {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const visibleItems = document.querySelectorAll('.menu-item.show');
+            
+            if (visibleItems.length === 0 && menuItems.length > 0) {
+                console.log('🔄 Activation solution de secours pour le menu');
+                menuItems.forEach(item => {
+                    if (item.getAttribute('data-category') === 'entrees') {
+                        item.style.display = 'block';
+                        item.classList.add('show');
+                    }
+                });
+            }
+        }, 1000);
+    }, 500);
+});
+
+
+// =============================================================================
+// CORRECTION MENU SEULEMENT - NE PAS MODIFIER LE RESTE DU CODE
+// =============================================================================
+
+console.log('Application de la correction menu...');
+
+// Surcharge sécurisée de la fonction menuManager
+const originalMenuManager = window.menuManager || {};
+
+const menuManagerCorrection = {
+    init: function() {
+        console.log('🔧 Correction menu initialisée');
+        
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        if (!tabBtns.length || !menuItems.length) {
+            console.log('❌ Éléments menu non trouvés');
+            return;
+        }
+
+        // Cacher tous les éléments sauf les entrées
+        menuItems.forEach(item => {
+            const category = item.getAttribute('data-category');
+            if (category === 'entrees') {
+                item.style.display = 'block';
+                setTimeout(() => item.classList.add('show'), 100);
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('show');
+            }
+        });
+
+        // Recréer les événements de clic
+        tabBtns.forEach(btn => {
+            // Supprimer les anciens événements
+            btn.replaceWith(btn.cloneNode(true));
+        });
+
+        // Recréer la référence après le clone
+        const newTabBtns = document.querySelectorAll('.tab-btn');
+        
+        newTabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleTabClick.call(btn);
+            });
+        });
+
+        // Activer le premier onglet
+        const firstTab = document.querySelector('.tab-btn[data-category="entrees"]');
+        if (firstTab) {
+            firstTab.classList.add('active');
+        }
+
+        console.log('✅ Menu corrigé:', menuItems.length, 'éléments');
+    },
+
+    handleTabClick: function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const category = this.getAttribute('data-category');
+        
+        console.log('📁 Catégorie sélectionnée:', category);
+
+        // Mettre à jour les onglets
+        tabBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        // Filtrer les éléments
+        menuItems.forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            
+            if (category === itemCategory) {
+                item.style.display = 'block';
+                setTimeout(() => item.classList.add('show'), 50);
+            } else {
+                item.classList.remove('show');
+                setTimeout(() => item.style.display = 'none', 300);
+            }
+        });
+    }
+};
+
+// Appliquer la correction après le chargement
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        menuManagerCorrection.init();
+    }, 1000); // Délai pour laisser l'ancien code s'initialiser
+});
+
+// =============================================================================
+// FIN DE LA CORRECTION MENU - NE PAS MODIFIER CI-DESSOUS
+// =============================================================================
+
 // Configuration AWS
 const API_CONFIG = {
   URL: 'https://xfpzt4zm66.execute-api.eu-west-3.amazonaws.com/prod/form',
@@ -17,6 +220,67 @@ const domElements = {
   tabBtns: document.querySelectorAll('.tab-btn'),
   menuItems: document.querySelectorAll('.menu-item')
 };
+
+// FIX IMMÉDIAT - Réinitialisation complète du menu
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initialisation du menu...');
+    
+    // Initialiser les onglets du menu
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    if (tabBtns.length && menuItems.length) {
+        // Cacher tous les éléments de menu sauf les entrées
+        menuItems.forEach(item => {
+            const category = item.getAttribute('data-category');
+            if (category === 'entrees') {
+                item.style.display = 'block';
+                item.classList.add('show');
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('show');
+            }
+        });
+        
+        // Ajouter les événements de clic
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Retirer active de tous les boutons
+                tabBtns.forEach(b => b.classList.remove('active'));
+                // Ajouter active au bouton cliqué
+                this.classList.add('active');
+                
+                const category = this.getAttribute('data-category');
+                filterMenuItems(category);
+            });
+        });
+        
+        // Activer le premier onglet
+        const firstTab = document.querySelector('.tab-btn[data-category="entrees"]');
+        if (firstTab) {
+            firstTab.classList.add('active');
+        }
+    }
+    
+    // Fonction de filtrage
+    function filterMenuItems(category) {
+        menuItems.forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            
+            if (category === 'all' || itemCategory === category) {
+                item.style.display = 'block';
+                setTimeout(() => {
+                    item.classList.add('show');
+                }, 10);
+            } else {
+                item.classList.remove('show');
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+});
 
 // Utility functions
 const utils = {
@@ -704,3 +968,291 @@ const analyticsManager = {
 document.addEventListener('DOMContentLoaded', function() {
   analyticsManager.init();
 });
+
+// Advanced Reservation System
+const advancedReservation = {
+  init: function() {
+    this.setupDateValidation();
+    this.setupTimeSlots();
+    this.setupPartySizeValidation();
+  },
+  
+  setupDateValidation: function() {
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+      // Empêcher les dates passées
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.min = today;
+      
+      // Empêcher la réservation trop en avance (6 mois max)
+      const maxDate = new Date();
+      maxDate.setMonth(maxDate.getMonth() + 6);
+      dateInput.max = maxDate.toISOString().split('T')[0];
+      
+      // Bloquer les lundis (exemple)
+      dateInput.addEventListener('change', (e) => {
+        const selectedDate = new Date(e.target.value);
+        if (selectedDate.getDay() === 1) { // Lundi = 1
+          utils.showNotification('Nous sommes fermés le lundi', false);
+          e.target.value = '';
+        }
+      });
+    }
+  },
+  
+  setupTimeSlots: function() {
+    const timeInput = document.getElementById('time');
+    if (timeInput) {
+      // Générer des créaux horaires dynamiques
+      const timeSlots = this.generateTimeSlots();
+      
+      timeInput.addEventListener('focus', () => {
+        this.showTimeSuggestions(timeSlots);
+      });
+    }
+  },
+  
+  generateTimeSlots: function() {
+    const slots = [];
+    for (let hour = 11; hour <= 23; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        if (hour >= 11 && hour <= 23) {
+          const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          slots.push(timeString);
+        }
+      }
+    }
+    return slots;
+  },
+  
+  showTimeSuggestions: function(slots) {
+    // Implémentation d'un dropdown de suggestions
+    const suggestionsDiv = document.createElement('div');
+    suggestionsDiv.className = 'time-suggestions';
+    suggestionsDiv.innerHTML = slots.map(slot => 
+      `<div class="time-slot" data-time="${slot}">${slot}</div>`
+    ).join('');
+    
+    const timeInput = document.getElementById('time');
+    timeInput.parentNode.appendChild(suggestionsDiv);
+    
+    // Gérer les clics sur les suggestions
+    suggestionsDiv.querySelectorAll('.time-slot').forEach(slot => {
+      slot.addEventListener('click', () => {
+        timeInput.value = slot.getAttribute('data-time');
+        suggestionsDiv.remove();
+      });
+    });
+  },
+  
+  setupPartySizeValidation: function() {
+    const guestsInput = document.getElementById('guests');
+    if (guestsInput) {
+      guestsInput.addEventListener('change', (e) => {
+        const guests = parseInt(e.target.value);
+        if (guests > 12) {
+          utils.showNotification('Pour les groupes de plus de 12 personnes, veuillez nous contacter directement', false);
+          e.target.value = 12;
+        }
+        if (guests < 1) {
+          e.target.value = 1;
+        }
+      });
+    }
+  }
+};
+
+// Gallery Manager
+const galleryManager = {
+  init: function() {
+    this.setupGalleryModal();
+    this.setupGalleryFilter();
+  },
+  
+  setupGalleryModal: function() {
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const modal = document.getElementById('galleryModal');
+    const modalImg = document.getElementById('modalImage');
+    const caption = document.querySelector('.modal-caption');
+    
+    galleryItems.forEach(item => {
+      item.addEventListener('click', () => {
+        modal.style.display = 'block';
+        modalImg.src = item.querySelector('img').src;
+        caption.textContent = item.querySelector('h3').textContent;
+      });
+    });
+    
+    // Close modal
+    document.querySelector('.modal-close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+    
+    // Close when clicking outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  },
+  
+  setupGalleryFilter: function() {
+    // Implémentation des filtres de gallery
+    const filterButtons = document.querySelectorAll('.gallery-filter');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const filter = button.getAttribute('data-filter');
+        
+        galleryItems.forEach(item => {
+          if (filter === 'all' || item.getAttribute('data-category') === filter) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  }
+};
+
+// Testimonials Manager
+const testimonialsManager = {
+  init: function() {
+    this.setupTestimonialsCarousel();
+    this.setupAutoplay();
+  },
+  
+  setupTestimonialsCarousel: function() {
+    const testimonials = document.querySelectorAll('.testimonial');
+    const dots = document.querySelectorAll('.testimonials-dots span');
+    let currentIndex = 0;
+    
+    // Create dots
+    testimonials.forEach((_, index) => {
+      const dot = document.createElement('span');
+      dot.addEventListener('click', () => this.showTestimonial(index));
+      document.querySelector('.testimonials-dots').appendChild(dot);
+    });
+    
+    // Navigation
+    document.querySelector('.testimonial-prev').addEventListener('click', () => {
+      this.showTestimonial((currentIndex - 1 + testimonials.length) % testimonials.length);
+    });
+    
+    document.querySelector('.testimonial-next').addEventListener('click', () => {
+      this.showTestimonial((currentIndex + 1) % testimonials.length);
+    });
+    
+    this.showTestimonial(0);
+  },
+  
+  showTestimonial: function(index) {
+    const testimonials = document.querySelectorAll('.testimonial');
+    const dots = document.querySelectorAll('.testimonials-dots span');
+    
+    testimonials.forEach(testimonial => testimonial.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    testimonials[index].classList.add('active');
+    dots[index].classList.add('active');
+    
+    currentIndex = index;
+  },
+  
+  setupAutoplay: function() {
+    setInterval(() => {
+      const testimonials = document.querySelectorAll('.testimonial');
+      const nextIndex = (currentIndex + 1) % testimonials.length;
+      this.showTestimonial(nextIndex);
+    }, 5000);
+  }
+};
+
+// Ajouter dans DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  // ... code existant ...
+  advancedReservation.init();
+  galleryManager.init();
+  testimonialsManager.init();
+});
+
+// RÉPARATION URGENTE - Afficher tout immédiatement
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Début de la réparation d\'urgence...');
+    
+    // 1. Afficher tous les services
+    const serviceCards = document.querySelectorAll('.service-card');
+    serviceCards.forEach(card => {
+        card.style.display = 'block';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    });
+    
+    // 2. Afficher tous les éléments de menu
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.style.display = 'block';
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+        item.classList.add('show');
+    });
+    
+    // 3. Réinitialiser les onglets du menu
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const menuGrid = document.querySelector('.menu-grid');
+    
+    if (tabBtns.length && menuItems.length) {
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Retirer active de tous les boutons
+                tabBtns.forEach(b => b.classList.remove('active'));
+                // Ajouter active au bouton cliqué
+                this.classList.add('active');
+                
+                const category = this.getAttribute('data-category');
+                filterMenuItems(category);
+            });
+        });
+    }
+    
+    // Fonction de filtrage simplifiée
+    function filterMenuItems(category) {
+        menuItems.forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            
+            if (category === 'all' || itemCategory === category) {
+                item.style.display = 'block';
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    // Afficher les entrées par défaut
+    const firstTab = document.querySelector('.tab-btn[data-category="entrees"]');
+    if (firstTab) {
+        firstTab.classList.add('active');
+    }
+    
+    console.log('Réparation terminée. Services:', serviceCards.length, 'Menu items:', menuItems.length);
+});
+
+// Fonction de débogage
+function debugPage() {
+    console.log('=== DÉBOGAGE ===');
+    console.log('Services trouvés:', document.querySelectorAll('.service-card').length);
+    console.log('Éléments menu trouvés:', document.querySelectorAll('.menu-item').length);
+    console.log('Onglets trouvés:', document.querySelectorAll('.tab-btn').length);
+    console.log('Grille services:', document.querySelector('.services-grid'));
+    console.log('Grille menu:', document.querySelector('.menu-grid'));
+}
