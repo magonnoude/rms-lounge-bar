@@ -1045,3 +1045,152 @@ nav ul li a:hover {
 .contact-info-item:nth-child(2) { animation-delay: 0.2s; }
 .contact-info-item:nth-child(3) { animation-delay: 0.3s; }
 .contact-info-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* Correction de la visibilité des catégories du menu */
+.menu-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.tab-btn {
+    background: rgba(200, 155, 60, 0.2);
+    border: 2px solid transparent;
+    padding: 12px 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: #ddd;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: rgba(200, 155, 60, 0.3);
+    color: #fff;
+    transform: translateY(-2px);
+    border-color: #c89b3c;
+}
+
+.tab-btn.active {
+    background: #c89b3c;
+    color: #000;
+    font-weight: 600;
+    border-color: #c89b3c;
+    box-shadow: 0 4px 15px rgba(200, 155, 60, 0.4);
+}
+
+/* Amélioration de la visibilité des cartes de menu */
+.menu-item {
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(200, 155, 60, 0.2);
+}
+
+.menu-item:hover {
+    box-shadow: 0 12px 35px rgba(200, 155, 60, 0.25);
+    transform: translateY(-5px);
+}
+
+.menu-item.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.menu-item-content {
+    padding: 25px;
+}
+
+.menu-item-title h3 {
+    font-size: 1.3rem;
+    margin-right: 10px;
+    color: #c89b3c;
+    font-weight: 600;
+}
+
+.menu-item-content p {
+    color: #ccc;
+    line-height: 1.6;
+}
+
+.price {
+    font-weight: 700;
+    color: #c89b3c;
+    font-size: 1.2rem;
+    white-space: nowrap;
+}
+
+/* Amélioration de la section menu */
+.menu .section-title {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 50px;
+}
+
+.menu .section-title h2 {
+    color: #c89b3c;
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+}
+
+.menu .section-title p {
+    color: #ddd;
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Responsive Design pour le menu */
+@media (max-width: 768px) {
+    .menu-tabs {
+        padding: 15px;
+        gap: 10px;
+    }
+    
+    .tab-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .menu .section-title {
+        padding: 20px;
+    }
+    
+    .menu .section-title h2 {
+        font-size: 2.2rem;
+    }
+    
+    .menu .section-title p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        max-width: 200px;
+        text-align: center;
+    }
+    
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+}
