@@ -2,5 +2,18 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /private/
+Disallow: /wp-admin/
+Disallow: /search/
+
+Crawl-delay: 1
 
 Sitemap: https://lounge.grouperms.com/sitemap.xml
+Sitemap: https://lounge.grouperms.com/sitemap-index.xml
+
+# Google AdsBot
+User-agent: AdsBot-Google
+Allow: /
+
+# Google Image Bot
+User-agent: Googlebot-Image
+Allow: /
