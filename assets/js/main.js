@@ -546,3 +546,161 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
   }
 });
+
+// Dans main.js - Ajouter ces fonctions
+const reservationManager = {
+  init: function() {
+    this.setupDatePicker();
+    this.setupTimeValidation();
+  },
+  
+  setupDatePicker: function() {
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.min = today;
+      
+      // Empêcher la sélection des jours passés
+      dateInput.addEventListener('input', function(e) {
+        const selectedDate = new Date(e.target.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          e.target.value = today.toISOString().split('T')[0];
+        }
+      });
+    }
+  },
+  
+  setupTimeValidation: function() {
+    const timeInput = document.getElementById('time');
+    if (timeInput) {
+      timeInput.addEventListener('change', function(e) {
+        const time = e.target.value;
+        const hours = parseInt(time.split(':')[0]);
+        
+        // Validation des horaires d'ouverture
+        if (hours < 11 || hours > 23) {
+          utils.showNotification('Nos horaires sont de 11h à 23h', false);
+          e.target.value = '12:00';
+        }
+      });
+    }
+  }
+};
+
+// Ajouter dans DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  // ... code existant ...
+  reservationManager.init();
+});
+
+// Dans main.js
+const testimonialsManager = {
+  init: function() {
+    this.setupTestimonialsCarousel();
+  },
+  
+  setupTestimonialsCarousel: function() {
+    const testimonials = document.querySelectorAll('.testimonial');
+    let currentIndex = 0;
+    
+    setInterval(() => {
+      testimonials.forEach(testimonial => {
+        testimonial.classList.remove('active');
+      });
+      
+      currentIndex = (currentIndex + 1) % testimonials.length;
+      testimonials[currentIndex].classList.add('active');
+    }, 5000);
+  }
+};
+
+const i18n = {
+  translations: {
+    fr: {
+      reserve: "Réserver",
+      contact: "Contact",
+      menu: "Menu"
+    },
+    en: {
+      reserve: "Book",
+      contact: "Contact", 
+      menu: "Menu"
+    }
+  },
+  
+  setLanguage: function(lang) {
+    document.documentElement.lang = lang;
+    this.updateTexts(lang);
+  },
+  
+  updateTexts: function(lang) {
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = this.translations[lang][key];
+    });
+  }
+};
+
+// Analytics Manager
+const analyticsManager = {
+  init: function() {
+    this.trackPageView();
+    this.setupEventTracking();
+  },
+  
+  trackPageView: function() {
+    if (typeof gtag !== 'undefined') {
+      gtag('config', 'GA_MEASUREMENT_ID', {
+        page_title: document.title,
+        page_location: window.location.href,
+        page_path: window.location.pathname
+      });
+    }
+  },
+  
+  trackEvent: function(category, action, label, value) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', action, {
+        event_category: category,
+        event_label: label,
+        value: value
+      });
+    }
+  },
+  
+  setupEventTracking: function() {
+    // Tracking des clics sur la navigation
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        this.trackEvent('Navigation', 'Menu Click', link.textContent);
+      });
+    });
+    
+    // Tracking des formulaires
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', () => {
+        const formType = form.id === 'reservationForm' ? 'Réservation' : 'Contact';
+        this.trackEvent('Formulaires', 'Soumission', formType);
+      });
+    });
+    
+    // Tracking des clicks sur le CTA
+    const ctaButtons = document.querySelectorAll('.btn.cta');
+    ctaButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        this.trackEvent('CTA', 'Click', button.textContent);
+      });
+    });
+  }
+};
+
+// Ajouter dans DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  analyticsManager.init();
+});

@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RMS Lounge Bar - Restaurant & Lounge à Cotonou</title>
+    <title>RMS Lounge Bar - Restaurant & Lounge à Cotonou | Réservation</title>
+    <meta name="description" content="Découvrez le RMS Lounge Bar, restaurant et bar d'exception. Cuisine raffinée, cocktails signature et ambiance lounge. Réservez votre table en ligne.">
+    <meta name="keywords" content="restaurant Cotonou, bar lounge, cuisine française et africaine, cocktails, réservation restaurant, dinner Cotonou">
+    <meta name="author" content="RMS Lounge Bar">
+    <meta name="robots" content="index, follow">
+
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,6 +17,79 @@
     <link rel="shortcut icon" href="/assets/images/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png" />
     <link rel="manifest" href="/assets/site.webmanifest" />
+    <!-- Dans le <head> de index.html -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+
+<!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXX');
+    </script>
+    <!-- End Google Tag Manager -->
+<!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lounge.grouperms.com/">
+    <meta property="og:title" content="RMS Lounge Bar - Restaurant & Bar Élégant">
+    <meta property="og:description" content="Découvrez le RMS Lounge Bar, restaurant et bar d'exception à Cotonou.">
+    <meta property="og:image" content="https://lounge.grouperms.com/assets/images/og-image.jpg">
+
+<!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://lounge.grouperms.com/">
+    <meta property="twitter:title" content="RMS Lounge Bar - Restaurant & Bar Élégant">
+    <meta property="twitter:description" content="Découvrez le RMS Lounge Bar, restaurant et bar d'exception à Cotonou.">
+    <meta property="twitter:image" content="https://lounge.grouperms.com/assets/images/twitter-image.jpg">
+
+<!-- Canonical URL -->
+    <link rel="canonical" href="https://lounge.grouperms.com/">
+
+<!-- Schema.org markup -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Lounge Paris",
+  "image": "https://lounge.grouperms.com/assets/images/logo.png",
+  "description": "Restaurant et bar lounge d'exception à Paris",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Avenue du Lounge",
+    "addressLocality": "Paris",
+    "postalCode": "75001",
+    "addressCountry": "FR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "48.8566",
+    "longitude": "2.3522"
+  },
+  "url": "https://lounge.grouperms.com",
+  "telephone": "+33123456789",
+  "openingHours": [
+    "Mo-Fr 11:00-02:00",
+    "Sa-Su 12:00-04:00"
+  ],
+  "priceRange": "€€",
+  "servesCuisine": ["Française", "Internationale", "Cocktails"],
+  "menu": "https://lounge.grouperms.com#menu"
+}
+</script>
 </head>
 <body>
      <!-- Header will be loaded here by JavaScript -->
@@ -1186,5 +1264,32 @@
                 .catch(error => console.error('Erreur chargement footer:', error));
         });
     </script>
+
+    <!-- Schema.org markup -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Lounge Paris",
+  "image": "https://lounge.grouperms.com/assets/images/logo.png",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Avenue du Lounge",
+    "addressLocality": "Paris",
+    "postalCode": "75001",
+    "addressCountry": "FR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "48.8566",
+    "longitude": "2.3522"
+  },
+  "url": "https://lounge.grouperms.com",
+  "telephone": "+229 01 61 95 04 15",
+  "openingHours": "Mo-Fr 11:00-02:00, Sa-Su 12:00-04:00",
+  "priceRange": "€€",
+  "servesCuisine": ["Française", "Internationale"]
+}
+</script>
 </body>
 </html>
