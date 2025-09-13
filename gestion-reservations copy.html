@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - RMS Lounge Bar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color:#1a1a1a; color:white; padding:15px 0; text-align:center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        header img { height:60px; vertical-align:middle; }
+        .container { max-width: 1400px; margin: 20px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); flex-grow: 1; }
+        h1, h2 { color: #8B4513; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 30px; }
+        h2 { text-align: left; border: none; font-size: 1.8em; }
+        #auth-container { text-align: center; max-width: 500px; margin: 100px auto; padding: 40px; border: 1px solid #ddd; border-radius: 8px; }
+        #dashboard { display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 50px; table-layout: fixed; }
+        th, td { padding: 15px; border: 1px solid #eee; text-align: left; vertical-align: middle; word-wrap: break-word; }
+        th { background-color: #333; color: white; }
+        .btn-confirm, .btn-refuse, .btn-view, .btn-manage { padding: 8px 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-size: 0.9em; margin-right: 5px; transition: background-color 0.3s ease; }
+        .btn-confirm { background-color: #28a745; }
+        .btn-refuse { background-color: #dc3545; }
+        .btn-view { background-color: #007bff; }
+        .btn-manage { background-color: #ffc107; color: #212529; }
+        .status-confirmed, .status-paid { color: #28a745; font-weight: bold; }
+        .status-refused { color: #dc3545; font-weight: bold; }
+        .status-pending, .status-awaiting-payment { color: #ffc107; font-weight: bold; }
+        footer { text-align: center; padding: 20px; margin-top: auto; color: #777; font-size: 0.9em; }
+        
+        /* Styles pour le Modal (Popup) */
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: none; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; z-index: 1001; width: 90%; max-width: 500px; display: none; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; color: #8B4513; }
+        .modal-close { font-size: 1.5rem; cursor: pointer; border: none; background: none; }
+        .modal-body .form-group { margin-bottom: 15px; }
+        .modal-body label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .modal-body input { width: calc(100% - 20px); padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="assets/images/logo.png" alt="RMS Lounge Bar Logo">
+    </header>
+
+    <div class="container">
+        <div id="auth-container">
+            <h1>Accès au Tableau de Bord</h1>
+            <input type="password" id="password" placeholder="Mot de passe" style="width: calc(100% - 24px); padding: 12px; margin-bottom: 20px;">
+            <button onclick="checkPassword()" style="padding: 12px 25px; background-color: #8B4513; color: white; border: none; cursor: pointer;">Accéder</button>
+        </div>
+
+        <div id="dashboard">
+            <h1>Tableau de Bord des Soumissions</h1>
+            
+            <h2><i class="fas fa-calendar-check"></i> Réservations</h2>
+            <table id="reservations-table">
+                </table>
+
+            <h2><i class="fas fa-envelope-open-text"></i> Messages & Devis</h2>
+            <table id="messages-table">
+                </table>
+        </div>
+    </div>
+    
+    <div class="modal-backdrop" id="paymentModalBackdrop"></div>
+    <div class="modal" id="paymentModal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Générer un lien de paiement</h3>
+            <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="paymentForm">
+                <input type="hidden" id="modalSubmissionId">
+                <div class="form-group">
+                    <label for="depositAmount">Montant de l'acompte (en FCFA)</label>
+                    <input type="number" id="depositAmount" placeholder="Ex: 50000" required>
+                </div>
+                <button type="submit" class="btn-confirm" style="width: 100%;">Créer et Envoyer le lien</button>
+            </form>
+            <div id="modalResult" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> RMS Lounge Bar - Tableau de Bord
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        const ADMIN_PASSWORD = "rms-lounge-2025"; 
+
+        function checkPassword() {
+            if (document.getElementById('password').value === ADMIN_PASSWORD) {
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                fetchSubmissions();
+            } else {
+                alert('Mot de passe incorrect.');
+            }
+        }
+
+        async function fetchSubmissions() {
+            const reservationsTable = document.getElementById('reservations-table');
+            const messagesTable = document.getElementById('messages-table');
+            reservationsTable.innerHTML = '<tbody><tr><td colspan="6">Chargement...</td></tr></tbody>';
+            messagesTable.innerHTML = '<tbody><tr><td colspan="5">Chargement...</td></tr></tbody>';
+
+            const API_URL = window.CONFIG.API_CONFIG.URL.replace('/form', '/reservations'); 
+            const API_KEY = window.CONFIG.API_CONFIG.KEY;
+
+            try {
+                const response = await fetch(API_URL, { headers: { 'x-api-key': API_KEY }});
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const submissions = await response.json();
+                displaySubmissions(submissions);
+            } catch (error) {
+                console.error('Erreur:', error);
+                reservationsTable.innerHTML = '<tbody><tr><td colspan="6" style="color:red;">Erreur de chargement.</td></tr></tbody>';
+                messagesTable.innerHTML = '<tbody><tr><td colspan="5" style="color:red;">Erreur de chargement.</td></tr></tbody>';
+            }
+        }
+
+        function displaySubmissions(submissions) {
+            const reservationsTable = document.getElementById('reservations-table');
+            const messagesTable = document.getElementById('messages-table');
+            
+            let reservationsHtml = `<thead><tr><th>Date Demande</th><th>Date Réservation</th><th>Nom & Contact</th><th>Personnes</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
+            let messagesHtml = `<thead><tr><th>Date Demande</th><th>Type</th><th>Nom & Contact</th><th>Sujet</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
+            let reservationsCount = 0;
+            let messagesCount = 0;
+
+            submissions.forEach(item => {
+                if (item.type === 'reservation') {
+                    reservationsCount++;
+                    let status = item.status || 'En attente';
+                    let statusClass = {'En attente': 'status-pending', 'Confirmée': 'status-confirmed', 'Refusée': 'status-refused'}[status] || '';
+                    reservationsHtml += `<tr id="row-${item.submissionsId}">
+                        <td>${new Date(item.timestamp).toLocaleString('fr-FR')}</td>
+                        <td>${item.date || ''} à ${item.time || ''}</td>
+                        <td>${item.name || ''}<br><small>${item.phone || ''}</small></td>
+                        <td>${item.guests || ''}</td>
+                        <td class="${statusClass}">${status}</td>
+                        <td>${status === 'En attente' ? `<button class="btn-confirm" onclick="updateStatus('${item.submissionsId}', 'Confirmée', this)">Confirmer</button><button class="btn-refuse" onclick="updateStatus('${item.submissionsId}', 'Refusée', this)">Refuser</button>` : `<span>Traitée</span>`}</td>
+                    </tr>`;
+                } else {
+                    messagesCount++;
+                    let status = item.status || 'En attente';
+                    let statusClass = {'En attente': 'status-pending', 'En attente de paiement': 'status-awaiting-payment', 'Confirmé & Payé': 'status-paid'}[status] || '';
+                    messagesHtml += `<tr id="row-${item.submissionsId}">
+                        <td>${new Date(item.timestamp).toLocaleString('fr-FR')}</td>
+                        <td>${item.type === 'event_inquiry' ? '🎉 Devis' : 'Contact'}</td>
+                        <td>${item.name || ''}<br><small>${item.email || ''}</small></td>
+                        <td>${item.subject || ''}</td>
+                        <td class="${statusClass}">${status}</td>
+                        <td>
+                            <button class="btn-view" onclick='showMessage(${JSON.stringify(item)})'>Voir</button>
+                            ${item.type === 'event_inquiry' && status === 'En attente' ? `<button class="btn-manage" onclick="openPaymentModal('${item.submissionsId}', '${item.name}')">Gérer Devis</button>` : ''}
+                        </td>
+                    </tr>`;
+                }
+            });
+
+            reservationsHtml += `</tbody>`;
+            messagesHtml += `</tbody>`;
+
+            reservationsTable.innerHTML = reservationsCount > 0 ? reservationsHtml : '<tbody><tr><td colspan="6" style="text-align:center;">Aucune réservation à afficher.</td></tr></tbody>';
+            messagesTable.innerHTML = messagesCount > 0 ? messagesHtml : '<tbody><tr><td colspan="6" style="text-align:center;">Aucun message à afficher.</td></tr></tbody>';
+        }
+        
+        function showMessage(item) {
+            const messageContent = `Message de : ${item.name} (${item.email})\n\nSujet : ${item.subject}\n\nMessage :\n${item.message}`;
+            alert(messageContent);
+        }
+
+        async function updateStatus(id, newStatus, buttonElement) { /* ... cette fonction reste identique ... */ }
+
+        // --- NOUVELLES FONCTIONS POUR LE MODAL DE PAIEMENT ---
+        const modal = document.getElementById('paymentModal');
+        const modalBackdrop = document.getElementById('paymentModalBackdrop');
+        
+        function openPaymentModal(submissionId, name) {
+            document.getElementById('modalTitle').textContent = `Acompte pour : ${name}`;
+            document.getElementById('modalSubmissionId').value = submissionId;
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('modalResult').innerHTML = '';
+            modal.style.display = 'block';
+            modalBackdrop.style.display = 'block';
+        }
+
+        function closePaymentModal() {
+            modal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        }
+
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Création...';
+
+            const submissionId = document.getElementById('modalSubmissionId').value;
+            const amount = parseInt(document.getElementById('depositAmount').value, 10);
+            
+            if (!amount || amount <= 0) {
+                alert('Veuillez entrer un montant valide.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer et Envoyer le lien';
+                return;
+            }
+
+            const API_URL = window.CONFIG.API_CONFIG.URL.replace('/form', `/reservations/${submissionId}/create-payment`);
+            const API_KEY = window.CONFIG.API_CONFIG.KEY;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
+                    body: JSON.stringify({ amount: amount })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'La création du lien a échoué.');
+                }
+
+                const result = await response.json();
+                document.getElementById('modalResult').innerHTML = `
+                    <p style="color: green; font-weight: bold;">Lien créé avec succès !</p>
+                    <p>Le client va recevoir un email. Vous pouvez aussi copier le lien :</p>
+                    <input type="text" value="${result.paymentUrl}" readonly onclick="this.select()">
+                `;
+                this.style.display = 'none'; // Cacher le formulaire après succès
+                fetchSubmissions(); // Rafraîchir la liste pour voir le nouveau statut
+            } catch (error) {
+                console.error('Erreur de création de lien:', error);
+                document.getElementById('modalResult').innerHTML = `<p style="color: red;">Erreur : ${error.message}</p>`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Créer et Envoyer le lien';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tableau de Bord - RMS Lounge Bar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root{
+      --brand:#8B4513; --bg:#f4f4f9; --text:#222; --muted:#6b7280;
+      --ok:#16a34a; --warn:#f59e0b; --err:#dc2626; --info:#2563eb;
+      --card:#fff; --line:#eee;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Montserrat',sans-serif;background:var(--bg);margin:0;color:var(--text);display:flex;min-height:100vh;flex-direction:column}
+    header{background:#1a1a1a;color:#fff;padding:14px 0;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,.15)}
+    header img{height:56px}
+    .container{max-width:1400px;margin:20px auto;background:var(--card);padding:24px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08);flex:1}
+    h1{color:var(--brand);text-align:center;margin:6px 0 24px;border-bottom:2px solid #f1f1f1;padding-bottom:10px}
+    h2{margin:28px 0 10px;color:var(--brand)}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .left, .right{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input[type="search"], select, input[type="number"], input[type="password"]{
+      padding:10px 12px;border:1px solid #ddd;border-radius:8px;min-width:220px
+    }
+    button, .btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-outline{background:#fff;border:1px solid #ddd}
+    .btn-confirm{background:var(--ok);color:#fff}
+    .btn-refuse{background:var(--err);color:#fff}
+    .btn-view{background:var(--info);color:#fff}
+    .btn-manage{background:var(--warn);color:#212529}
+    table{width:100%;border-collapse:collapse;margin-top:8px;border:1px solid var(--line)}
+    th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+    th{background:#111;color:#fff;position:sticky;top:0;z-index:1}
+    tr:hover{background:#fafafa}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .b-pending{background:#fff3cd;color:#7a5d00;border:1px solid #ffe08a}
+    .b-await{background:#fff3cd;color:#7a5d00;border:1px solid #ffe08a}
+    .b-confirm{background:#e6f9ed;color:#0d5f2f;border:1px solid #b5efc7}
+    .b-paid{background:#e6f0ff;color:#1e40af;border:1px solid #c7d2fe}
+    .b-refused{background:#ffe4e6;color:#9f1239;border:1px solid #fecdd3}
+    footer{text-align:center;color:#777;padding:16px}
+    /* Auth card */
+    #auth{max-width:420px;margin:100px auto;background:var(--card);padding:26px;border-radius:12px;border:1px solid #eee}
+    /* Modal */
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none}
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:20px;border-radius:12px;min-width:320px;max-width:520px;display:none}
+    .modal header{display:flex;align-items:center;justify-content:space-between;background:transparent;color:var(--brand);box-shadow:none;padding:0;margin-bottom:12px}
+    .modal .row{margin-bottom:12px}
+    .copy-field{display:flex;gap:6px}
+    .copy-field input{flex:1}
+    .close-x{background:transparent;border:0;font-size:20px;cursor:pointer}
+    .empty{padding:18px;text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/images/logo.png" alt="RMS Lounge Bar">
+  </header>
+
+  <div class="container">
+    <!-- AUTH -->
+    <div id="auth">
+      <h1>Accès au Tableau de Bord</h1>
+      <p class="muted">Saisissez le mot de passe administrateur.</p>
+      <div class="row" style="display:flex;gap:8px;align-items:center">
+        <input type="password" id="adminPass" placeholder="Mot de passe"/>
+        <button class="btn-primary" id="btnLogin">Accéder</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="app" style="display:none">
+      <h1>Tableau de Bord des Soumissions</h1>
+
+      <!-- Barre globale -->
+      <div class="toolbar">
+        <div class="left">
+          <input type="search" id="q" placeholder="Rechercher nom / email / sujet...">
+          <select id="statusFilter">
+            <option value="">Tous les statuts</option>
+            <option>En attente</option>
+            <option>Confirmée</option>
+            <option>Refusée</option>
+            <option>En attente de paiement</option>
+            <option>Confirmé & Payé</option>
+          </select>
+          <button class="btn-outline" id="btnExport"><i class="fa fa-file-export"></i> Export CSV</button>
+        </div>
+        <div class="right">
+          <span class="muted">Total: <b id="countAll">0</b></span>
+        </div>
+      </div>
+
+      <!-- Réservations -->
+      <h2><i class="fa fa-calendar-check"></i> Réservations</h2>
+      <table id="tblReservations"><thead>
+        <tr>
+          <th>Date Demande</th><th>Date Réservation</th><th>Nom & Contact</th><th>Pers.</th><th>Statut</th><th>Actions</th>
+        </tr></thead><tbody id="bodyReservations"></tbody></table>
+      <div id="emptyReservations" class="empty" style="display:none">Aucune réservation.</div>
+
+      <!-- Messages & Devis -->
+      <h2><i class="fa fa-envelope-open-text"></i> Messages & Devis</h2>
+      <table id="tblMessages"><thead>
+        <tr>
+          <th>Date Demande</th><th>Type</th><th>Nom & Contact</th><th>Sujet</th><th>Statut</th><th>Actions</th>
+        </tr></thead><tbody id="bodyMessages"></tbody></table>
+      <div id="emptyMessages" class="empty" style="display:none">Aucun message.</div>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <div class="modal" id="modal">
+    <header>
+      <h3 id="modalTitle" style="margin:0">Générer un lien de paiement</h3>
+      <button class="close-x" id="closeModal">&times;</button>
+    </header>
+    <div class="row">
+      <input type="hidden" id="subId">
+      <label for="amount">Montant de l'acompte (FCFA)</label>
+      <input type="number" id="amount" placeholder="Ex: 50000" min="500" step="1">
+    </div>
+    <div class="row">
+      <button class="btn-confirm" id="btnCreateLink">Créer le lien</button>
+    </div>
+    <div id="resultZone" class="row" style="display:none">
+      <label>Lien de paiement</label>
+      <div class="copy-field">
+        <input type="text" id="paymentUrl" readonly>
+        <button class="btn-outline" id="btnCopy"><i class="fa fa-copy"></i> Copier</button>
+      </div>
+      <p class="muted" id="resultHint" style="margin-top:6px"></p>
+    </div>
+  </div>
+
+  <footer>&copy; <span id="y"></span> RMS Lounge Bar</footer>
+
+  <!-- Ta config (clé/API Gateway) -->
+  <script src="config.js"></script>
+  <script>
+    // --- Utilitaires ---
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const fmtDT = ts => ts ? new Date(ts).toLocaleString('fr-FR') : '';
+    const stamp = () => new Date().toISOString().replace('T',' ').slice(0,19);
+
+    const ADMIN_PASSWORD = "rms-lounge-2025"; // remplace par ENV/OTP SES idéalement. :contentReference[oaicite:6]{index=6}
+    $("#y").textContent = new Date().getFullYear();
+
+    // --- State ---
+    let RAW = [];            // données brutes depuis l'API
+    let FILTERED = [];       // données filtrées pour l'affichage courant
+    let CURRENT_TYPE = null; // 'reservation' / 'event_inquiry' / autre
+
+    // --- Auth ---
+    $("#btnLogin").addEventListener("click", () => {
+      if ($("#adminPass").value === ADMIN_PASSWORD) {
+        $("#auth").style.display = "none";
+        $("#app").style.display = "block";
+        loadData();
+      } else {
+        alert("Mot de passe incorrect.");
+      }
+    });
+
+    // --- Chargement des données ---
+    async function loadData(){
+      const API_URL = window.CONFIG.API_CONFIG.URL.replace('/form', '/reservations'); // idem ta version :contentReference[oaicite:7]{index=7}
+      const API_KEY = window.CONFIG.API_CONFIG.KEY;
+
+      $("#bodyReservations").innerHTML = `<tr><td colspan="6">Chargement...</td></tr>`;
+      $("#bodyMessages").innerHTML    = `<tr><td colspan="6">Chargement...</td></tr>`;
+
+      try{
+        const r = await fetch(API_URL, { headers:{ "x-api-key": API_KEY }});
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        RAW = await r.json();
+        applyFiltersAndRender();
+      }catch(e){
+        console.error(e);
+        $("#bodyReservations").innerHTML = `<tr><td colspan="6" style="color:#dc2626">Erreur de chargement.</td></tr>`;
+        $("#bodyMessages").innerHTML    = `<tr><td colspan="6" style="color:#dc2626">Erreur de chargement.</td></tr>`;
+      }
+    }
+
+    // --- Filtres / Recherche ---
+    $("#q").addEventListener("input", applyFiltersAndRender);
+    $("#statusFilter").addEventListener("change", applyFiltersAndRender);
+
+    function matchStatusBadge(s){
+      const status = (s || "En attente").toLowerCase();
+      if (status.includes("confirmé") && status.includes("pay")) return `<span class="badge b-paid">Confirmé & Payé</span>`;
+      if (status.includes("en attente de paiement")) return `<span class="badge b-await">En attente de paiement</span>`;
+      if (status.includes("confirm")) return `<span class="badge b-confirm">Confirmée</span>`;
+      if (status.includes("refus")) return `<span class="badge b-refused">Refusée</span>`;
+      return `<span class="badge b-pending">En attente</span>`;
+    }
+
+    function applyFiltersAndRender(){
+      const q = $("#q").value.trim().toLowerCase();
+      const f = $("#statusFilter").value;
+
+      const list = RAW.filter(x=>{
+        const hay = `${x.name||""} ${x.email||""} ${x.phone||""} ${x.subject||""}`.toLowerCase();
+        const statusOk = !f || (x.status||"").toLowerCase() === f.toLowerCase();
+        const textOk   = !q || hay.includes(q);
+        return statusOk && textOk;
+      });
+
+      FILTERED = list;
+      $("#countAll").textContent = list.length;
+
+      renderTables(list);
+    }
+
+    function renderTables(list){
+      const res = list.filter(x=> x.type === "reservation");
+      const msg = list.filter(x=> x.type !== "reservation");
+
+      // Réservations
+      const rBody = $("#bodyReservations");
+      if(res.length === 0){ $("#emptyReservations").style.display="block"; rBody.innerHTML=""; }
+      else{
+        $("#emptyReservations").style.display="none";
+        rBody.innerHTML = res.map(item=>{
+          const when = `${item.date||""} ${item.time?("à "+item.time):""}`.trim();
+          return `<tr id="row-${item.submissionsId}">
+            <td>${fmtDT(item.timestamp)}</td>
+            <td>${when}</td>
+            <td>${item.name||""}<br><small class="muted">${item.phone||""}</small></td>
+            <td>${item.guests||""}</td>
+            <td>${matchStatusBadge(item.status)}</td>
+            <td>
+              ${(!item.status || item.status==="En attente") ? `
+                <button class="btn-confirm" onclick="updateStatus('${item.submissionsId}','Confirmée', this)">Confirmer</button>
+                <button class="btn-refuse"  onclick="updateStatus('${item.submissionsId}','Refusée', this)">Refuser</button>
+              ` : `<span class="muted">Traitée</span>`}
+            </td>
+          </tr>`;
+        }).join("");
+      }
+
+      // Messages & Devis
+      const mBody = $("#bodyMessages");
+      if(msg.length === 0){ $("#emptyMessages").style.display="block"; mBody.innerHTML=""; }
+      else{
+        $("#emptyMessages").style.display="none";
+        mBody.innerHTML = msg.map(item=>{
+          const typeLabel = item.type==="event_inquiry" ? "🎉 Devis" : "Contact";
+          const canManage = (item.type==="event_inquiry") && (!item.status || item.status==="En attente");
+          return `<tr id="row-${item.submissionsId}">
+            <td>${fmtDT(item.timestamp)}</td>
+            <td>${typeLabel}</td>
+            <td>${item.name||""}<br><small class="muted">${item.email||""}</small></td>
+            <td>${item.subject||""}</td>
+            <td>${matchStatusBadge(item.status)}</td>
+            <td>
+              <button class="btn-view" onclick='viewMessage(${JSON.stringify({n:item.name,e:item.email,s:item.subject,m:item.message||""})})'>Voir</button>
+              ${canManage ? `<button class="btn-manage" onclick="openPaymentModal('${item.submissionsId}','${(item.name||"").replace(/"/g,"&quot;")}')">Gérer Devis</button>` : ""}
+            </td>
+          </tr>`;
+        }).join("");
+      }
+    }
+
+    // --- Voir message ---
+    function viewMessage(o){
+      alert(`Message de : ${o.n} (${o.e})\n\nSujet : ${o.s}\n\nMessage :\n${o.m}`);
+    }
+
+    // --- Update statut ---
+    async function updateStatus(id, newStatus, btn){
+      const API_URL = window.CONFIG.API_CONFIG.URL.replace('/form', `/reservations/${id}/status`);
+      const API_KEY = window.CONFIG.API_CONFIG.KEY;
+      try{
+        btn.disabled = true; btn.textContent = "Maj...";
+        const r = await fetch(API_URL, {
+          method: "PUT",
+          headers: {"x-api-key": API_KEY, "Content-Type":"application/json"},
+          body: JSON.stringify({status:newStatus})
+        });
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        // maj local
+        const ix = RAW.findIndex(x=>x.submissionsId===id);
+        if(ix>=0){ RAW[ix].status = newStatus; }
+        applyFiltersAndRender();
+      }catch(e){
+        console.error(e); alert("Erreur de mise à jour du statut.");
+      }finally{
+        btn.disabled = false; btn.textContent = (newStatus==="Confirmée"?"Confirmer":"Refuser");
+      }
+    }
+
+    // --- Modal Paiement ---
+    const backdrop = $("#backdrop");
+    const modal = $("#modal");
+    $("#closeModal").addEventListener("click", closeModal);
+    backdrop.addEventListener("click", closeModal);
+
+    function openPaymentModal(submissionId, name){
+      $("#modalTitle").textContent = `Acompte pour : ${name}`;
+      $("#subId").value = submissionId;
+      $("#amount").value = "";
+      $("#resultZone").style.display = "none";
+      $("#paymentUrl").value = "";
+      $("#resultHint").textContent = "";
+      backdrop.style.display = "block";
+      modal.style.display = "block";
+    }
+    function closeModal(){
+      backdrop.style.display = "none";
+      modal.style.display = "none";
+    }
+
+    $("#btnCreateLink").addEventListener("click", async ()=>{
+      const submissionId = $("#subId").value;
+      const amount = parseInt($("#amount").value,10);
+      if(!amount || amount<=0) return alert("Veuillez entrer un montant valide.");
+
+      const API_URL = window.CONFIG.API_CONFIG.URL.replace('/form', `/reservations/${submissionId}/create-payment`);
+      const API_KEY = window.CONFIG.API_CONFIG.KEY;
+
+      const btn = $("#btnCreateLink");
+      btn.disabled = true; btn.textContent = "Création...";
+      try{
+        const r = await fetch(API_URL, {
+          method:"POST",
+          headers: {"x-api-key": API_KEY, "Content-Type":"application/json"},
+          body: JSON.stringify({amount})
+        });
+        const data = await r.json();
+        if(!r.ok) throw new Error(data?.error || ("HTTP "+r.status));
+        $("#paymentUrl").value = data.paymentUrl || "";
+        $("#resultHint").textContent = data.paymentUrl ? "Lien prêt. Copiez et envoyez au client." : "Lien non reçu.";
+        $("#resultZone").style.display = "block";
+
+        // Optionnel: marquer la demande "En attente de paiement"
+        const ix = RAW.findIndex(x=>x.submissionsId===submissionId);
+        if(ix>=0){ RAW[ix].status = "En attente de paiement"; }
+        applyFiltersAndRender();
+      }catch(e){
+        console.error(e);
+        alert("Erreur lors de la création du lien de paiement.");
+      }finally{
+        btn.disabled = false; btn.textContent = "Créer le lien";
+      }
+    });
+
+    $("#btnCopy").addEventListener("click", async ()=>{
+      const v = $("#paymentUrl").value;
+      if(!v) return;
+      try{ await navigator.clipboard.writeText(v); alert("Lien copié."); }
+      catch{ prompt("Copiez le lien :", v); }
+    });
+
+    // --- Export CSV ---
+    $("#btnExport").addEventListener("click", ()=>{
+      const rows = [
+        ["id","type","timestamp","date","time","name","email","phone","guests","subject","status","paymentUrl"]
+      ];
+      FILTERED.forEach(x=>{
+        rows.push([
+          x.submissionsId||"", x.type||"", new Date(x.timestamp||"").toISOString(),
+          x.date||"", x.time||"", x.name||"", x.email||"", x.phone||"",
+          String(x.guests||""), (x.subject||"").replace(/\n/g," "),
+          x.status||"", x.paymentUrl||""
+        ]);
+      });
+      const csv = rows.map(r=>r.map(cell=>{
+        const s = String(cell??"");
+        return `"${s.replace(/"/g,'""')}"`;
+      }).join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `reservations_${stamp().replace(/[: ]/g,'-')}.csv`;
+      document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+    });
+
+    // Accessibilité & UX
+    document.addEventListener("keydown", (e)=>{
+      if(e.key==="Escape" && modal.style.display==="block") closeModal();
+    });
+  </script>
+</body>
+</html>

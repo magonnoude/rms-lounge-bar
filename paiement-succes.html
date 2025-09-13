@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement Réussi - RMS Lounge Bar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --success-color: #28a745;
+            --primary-color: #8B4513;
+            --dark-color: #1a1a1a;
+            --light-bg: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            color: var(--success-color);
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        h1 {
+            color: var(--success-color);
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .confirmation-details {
+            background: var(--light-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .amount {
+            font-size: 1.3em;
+            color: var(--success-color);
+            font-weight: 700;
+        }
+        
+        .next-steps {
+            background: #e8f5e8;
+            border-left: 4px solid var(--success-color);
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+        
+        .next-steps h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .next-steps ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .next-steps li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .next-steps li i {
+            color: var(--success-color);
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background: #6b3300;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .contact-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .contact-info p {
+            margin-bottom: 5px;
+        }
+        
+        .logo {
+            max-width: 120px;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            .success-icon {
+                font-size: 60px;
+            }
+            
+            .btn {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="assets/images/logo.png" alt="RMS Lounge Bar" class="logo">
+        
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h1>Paiement Réussi !</h1>
+        <h2>Merci pour votre confiance</h2>
+        
+        <p>Votre acompte a été payé avec succès. Votre réservation/événement est maintenant confirmé.</p>
+        
+        <div class="confirmation-details">
+            <div class="detail-item">
+                <span class="detail-label">Référence:</span>
+                <span class="detail-value" id="transaction-id">Chargement...</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Montant payé:</span>
+                <span class="detail-value amount" id="amount">Chargement...</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Date du paiement:</span>
+                <span class="detail-value" id="payment-date">Chargement...</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Statut:</span>
+                <span class="detail-value" style="color: var(--success-color); font-weight: 600;">Confirmé</span>
+            </div>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Prochaines étapes :</h3>
+            <ul>
+                <li><i class="fas fa-check"></i> Vous recevrez un email de confirmation sous peu</li>
+                <li><i class="fas fa-check"></i> Notre équipe vous contactera pour finaliser les détails</li>
+                <li><i class="fas fa-check"></i> Présentez cette confirmation à votre arrivée</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="https://lounge.grouperms.com" class="btn">
+                <i class="fas fa-home"></i> Retour à l'accueil
+            </a>
+            <a href="#contact" class="btn btn-outline">
+                <i class="fas fa-phone"></i> Nous contacter
+            </a>
+        </div>
+        
+        <div class="contact-info">
+            <p><strong>RMS Lounge Bar</strong></p>
+            <p><i class="fas fa-phone"></i> +229 01 67 14 12 43</p>
+            <p><i class="fas fa-envelope"></i> lounge@grouperms.com</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer les paramètres d'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const transactionId = urlParams.get('transaction_id');
+            const amount = urlParams.get('amount');
+            
+            // Afficher les informations
+            if (transactionId) {
+                document.getElementById('transaction-id').textContent = transactionId;
+            }
+            
+            if (amount) {
+                document.getElementById('amount').textContent = parseInt(amount).toLocaleString('fr-FR') + ' FCFA';
+            }
+            
+            document.getElementById('payment-date').textContent = new Date().toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Simuler l'envoi des données au serveur (à remplacer par un vrai appel API)
+            if (transactionId) {
+                simulateConfirmation(transactionId);
+            }
+        });
+        
+        function simulateConfirmation(transactionId) {
+            console.log('Simulation de confirmation pour la transaction:', transactionId);
+            // Ici, vous devriez faire un appel API à votre backend
+            // pour confirmer le paiement et mettre à jour la base de données
+        }
+    </script>
+</body>
+</html>

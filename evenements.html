@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Événements Privés - RMS Lounge Bar</title>
+    <meta name="description" content="Organisez vos événements privés (anniversaire, séminaire) dans un cadre d'exception au RMS Lounge Bar à Cotonou. Demandez votre devis sur-mesure.">
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lc2lLkrAAAAAMMlzMzaA6MqY6TLYPR4OLGXlLOy"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style pour la page événementielle */
+        .event-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/images/Evenement_prive.jpg') no-repeat center center/cover;
+            padding: 120px 0;
+            text-align: center;
+            color: white;
+        }
+        .event-form-section {
+            padding: 100px 0;
+            background-color: #f4f4f9;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { flex: 1; }
+        @media (max-width: 768px) { .form-row { flex-direction: column; gap: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="header-container"></div>
+
+    <section class="event-hero">
+        <div class="container">
+            <h1>Vos Événements Privés au RMS Lounge</h1>
+            <p>Un cadre unique pour des moments inoubliables.</p>
+        </div>
+    </section>
+
+    <section class="event-form-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="section-title">
+                    <h2>Demandez votre devis sur-mesure</h2>
+                    <p>Remplissez ce formulaire et notre équipe vous contactera dans les plus brefs délais.</p>
+                </div>
+
+                <form id="eventForm">
+                    <input type="hidden" name="subject" value="Demande de Devis pour Événement Privé">
+
+                    <div class="form-group">
+                        <label for="name">Nom & Prénom *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Téléphone *</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventType">Type d'événement</label>
+                            <select id="eventType" name="eventType">
+                                <option value="Anniversaire">Anniversaire</option>
+                                <option value="Séminaire d'entreprise">Séminaire d'entreprise</option>
+                                <option value="Afterwork">Afterwork</option>
+                                <option value="Mariage / Célébration">Mariage / Célébration</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="guestCount">Nombre d'invités (estimation)</label>
+                            <input type="number" id="guestCount" name="guestCount" min="5">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDate">Date souhaitée</label>
+                        <input type="date" id="eventDate" name="eventDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Décrivez-nous vos besoins (horaires, ambiance, services souhaités...)</label>
+                        <textarea id="message" name="message" rows="5"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%; text-align: center;">Envoyer ma demande</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div id="footer-container"></div>
+
+    <script src="config.js"></script>
+    <script>
+       document.addEventListener('DOMContentLoaded', function() {
+    // Charger dynamiquement le header et le footer
+    fetch('header.html').then(response => response.text()).then(data => document.getElementById('header-container').innerHTML = data);
+    fetch('footer.html').then(response => response.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+
+    // Logique du formulaire
+    const eventForm = document.getElementById('eventForm');
+    eventForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Vérification en cours...';
+        submitBtn.disabled = true;
+
+        try {
+            // --- AJOUT : Exécuter reCAPTCHA pour obtenir un token ---
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6Lc2lLkrAAAAAMMlzMzaA6MqY6TLYPR4OLGXlLOy', {action: 'submit'}).then(async function(token) {
+
+                    submitBtn.textContent = 'Envoi en cours...';
+
+                    const formData = new FormData(eventForm);
+                    const data = Object.fromEntries(formData.entries());
+
+                    // --- AJOUT : Ajouter le token aux données envoyées ---
+                    data.recaptcha_token = token;
+
+                    const response = await fetch(window.CONFIG.API_CONFIG.URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': window.CONFIG.API_CONFIG.KEY
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        // Essayer de lire le message d'erreur de l'API
+                        const errorResult = await response.json();
+                        throw new Error(errorResult.error || 'Erreur réseau');
+                    }
+
+                    alert('Votre demande de devis a bien été envoyée ! Nous vous répondrons très prochainement.');
+                    eventForm.reset();
+                });
+            });
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue: ' + error.message);
+        } finally {
+            // Le bouton est réactivé dans la logique ci-dessus pour une meilleure gestion
+            submitBtn.textContent = 'Envoyer ma demande';
+            submitBtn.disabled = false;
+        }
+    });
+});
+    </script>
+</body>
+</html>

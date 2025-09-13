@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion des Réservations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --success-dark: #059669;
+            --warning: #f59e0b;
+            --warning-dark: #d97706;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --gray: #6b7280;
+            --light-gray: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6e6ff 100%);
+            color: #334155;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px 20px;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            font-size: 32px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .fedapay-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .admin-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .card-text {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .card-total .card-icon {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+        
+        .card-pending .card-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .card-confirmed .card-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .card-cancelled .card-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+        
+        select, input {
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--success-dark);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: var(--danger-dark);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: var(--warning-dark);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .reservations-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        .reservations-table th,
+        .reservations-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .reservations-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--dark);
+            position: sticky;
+            top: 0;
+        }
+        
+        .reservations-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .reservations-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-confirmed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelled {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-paid {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 30px;
+        }
+        
+        .pagination button {
+            background-color: white;
+            border: 1px solid var(--light-gray);
+            color: var(--gray);
+            min-width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--success);
+        }
+        
+        .notification.error {
+            background-color: var(--danger);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            background: var(--light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .reservation-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: var(--gray);
+        }
+        
+        .payment-section {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .payment-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .api-config {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .config-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .admin-info {
+                position: static;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .reservation-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-buttons {
+                flex-direction: column;
+            }
+            
+            .config-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="logo-container">
+                    <div class="logo">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="logo-text">Réservations</div>
+                </div>
+                
+                <div class="fedapay-badge">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Paiements sécurisés par FedaPay</span>
+                </div>
+            </div>
+            
+            <h1>Gestion des Réservations</h1>
+            <p>Interface d'administration des réservations</p>
+            
+            <div class="admin-info">
+                <div class="admin-avatar">AD</div>
+                <div>Admin</div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="api-config">
+                <h3>Configuration API</h3>
+                <div class="config-form">
+                    <div class="filter-item">
+                        <label for="api-url">URL de l'API</label>
+                        <input type="text" id="api-url" placeholder="https://votre-api.com">
+                    </div>
+                    <div class="filter-item">
+                        <label for="api-key">Clé API</label>
+                        <input type="password" id="api-key" placeholder="Votre clé API secrète">
+                    </div>
+                    <div class="filter-item">
+                        <label for="fedapay-key">Clé Publique FedaPay</label>
+                        <input type="text" id="fedapay-key" placeholder="pk_sandbox_XXX">
+                    </div>
+                    <div class="filter-item" style="justify-content: flex-end;">
+                        <button class="btn-primary" id="saveConfig">
+                            <i class="fas fa-save"></i> Enregistrer la configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard">
+                <div class="card card-total">
+                    <div class="card-header">
+                        <div class="card-title">Total des réservations</div>
+                        <div class="card-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="total-reservations">0</div>
+                    <div class="card-text">Ce mois-ci</div>
+                </div>
+                
+                <div class="card card-pending">
+                    <div class="card-header">
+                        <div class="card-title">En attente</div>
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="pending-reservations">0</div>
+                    <div class="card-text">Nécessitent une action</div>
+                </div>
+                
+                <div class="card card-confirmed">
+                    <div class="card-header">
+                        <div class="card-title">Confirmées</div>
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="confirmed-reservations">0</div>
+                    <div class="card-text">Réservations actives</div>
+                </div>
+                
+                <div class="card card-cancelled">
+                    <div class="card-header">
+                        <div class="card-title">Annulées</div>
+                        <div class="card-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="cancelled-reservations">0</div>
+                    <div class="card-text">Ce mois-ci</div>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-item">
+                    <label for="status-filter">Statut</label>
+                    <select id="status-filter">
+                        <option value="all">Tous les statuts</option>
+                        <option value="pending">En attente</option>
+                        <option value="confirmed">Confirmé</option>
+                        <option value="cancelled">Annulé</option>
+                        <option value="paid">Payé</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="date-from">Du</label>
+                    <input type="date" id="date-from">
+                </div>
+                
+                <div class="filter-item">
+                    <label for="date-to">Au</label>
+                    <input type="date" id="date-to">
+                </div>
+                
+                <div class="filter-item">
+                    <label for="search">Recherche</label>
+                    <input type="text" id="search" placeholder="Nom, email, téléphone...">
+                </div>
+                
+                <div class="filter-item" style="justify-content: flex-end;">
+                    <button class="btn-primary" id="applyFilters">
+                        <i class="fas fa-filter"></i> Appliquer
+                    </button>
+                    <button class="btn-success" id="refreshData" style="margin-left: 10px;">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Contact</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Personnes</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-body">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 30px;">
+                                <i class="fas fa-info-circle" style="color: var(--gray); margin-right: 10px;"></i>
+                                Configurez l'API et chargez les données
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button class="btn-primary" id="prev-page">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button class="btn-primary" id="next-page">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Opération réussie</span>
+    </div>
+
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Détails de la réservation</h3>
+                <button id="closeModal" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="reservation-details" id="modal-details">
+                    <!-- Les détails seront chargés ici dynamiquement -->
+                </div>
+                
+                <div class="payment-section">
+                    <h4>Paiement FedaPay</h4>
+                    <p>Gérez le paiement de cette réservation via FedaPay</p>
+                    
+                    <div class="payment-buttons">
+                        <button class="btn-success" id="processPayment">
+                            <i class="fas fa-credit-card"></i> Traiter le paiement
+                        </button>
+                        <button class="btn-warning" id="refundPayment">
+                            <i class="fas fa-undo"></i> Remboursement
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" id="cancelReservation">
+                    <i class="fas fa-times"></i> Annuler la réservation
+                </button>
+                <button class="btn-success" id="confirmReservation">
+                    <i class="fas fa-check"></i> Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables de configuration
+        let API_URL = '';
+        let API_KEY = '';
+        let FEDAPAY_PUBLIC_KEY = '';
+        
+        // Variables globales
+        let currentReservationId = null;
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Éléments DOM
+        const reservationsBody = document.getElementById('reservations-body');
+        const statusFilter = document.getElementById('status-filter');
+        const dateFrom = document.getElementById('date-from');
+        const dateTo = document.getElementById('date-to');
+        const searchInput = document.getElementById('search');
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        const refreshDataBtn = document.getElementById('refreshData');
+        const saveConfigBtn = document.getElementById('saveConfig');
+        const apiUrlInput = document.getElementById('api-url');
+        const apiKeyInput = document.getElementById('api-key');
+        const fedapayKeyInput = document.getElementById('fedapay-key');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        const totalReservations = document.getElementById('total-reservations');
+        const pendingReservations = document.getElementById('pending-reservations');
+        const confirmedReservations = document.getElementById('confirmed-reservations');
+        const cancelledReservations = document.getElementById('cancelled-reservations');
+        const detailsModal = document.getElementById('detailsModal');
+        const modalDetails = document.getElementById('modal-details');
+        const closeModal = document.getElementById('closeModal');
+        const confirmReservationBtn = document.getElementById('confirmReservation');
+        const cancelReservationBtn = document.getElementById('cancelReservation');
+        const processPaymentBtn = document.getElementById('processPayment');
+        const refundPaymentBtn = document.getElementById('refundPayment');
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+            setupEventListeners();
+            setDefaultDates();
+            
+            // Si la configuration est déjà sauvegardée, charger les données
+            if (API_URL && API_KEY) {
+                loadReservations();
+            }
+        });
+
+        // Charger la configuration depuis le localStorage
+        function loadConfig() {
+            const savedConfig = localStorage.getItem('reservationSystemConfig');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                API_URL = config.apiUrl;
+                API_KEY = config.apiKey;
+                FEDAPAY_PUBLIC_KEY = config.fedapayKey;
+                
+                // Remplir les champs de formulaire
+                apiUrlInput.value = API_URL;
+                apiKeyInput.value = API_KEY;
+                fedapayKeyInput.value = FEDAPAY_PUBLIC_KEY;
+            }
+        }
+
+        // Sauvegarder la configuration dans le localStorage
+        function saveConfig() {
+            API_URL = apiUrlInput.value.trim();
+            API_KEY = apiKeyInput.value.trim();
+            FEDAPAY_PUBLIC_KEY = fedapayKeyInput.value.trim();
+            
+            const config = {
+                apiUrl: API_URL,
+                apiKey: API_KEY,
+                fedapayKey: FEDAPAY_PUBLIC_KEY
+            };
+            
+            localStorage.setItem('reservationSystemConfig', JSON.stringify(config));
+            showNotification('Configuration sauvegardée avec succès', 'success');
+            
+            // Charger les données après la configuration
+            loadReservations();
+        }
+
+        // Configurer les écouteurs d'événements
+        function setupEventListeners() {
+            applyFiltersBtn.addEventListener('click', filterReservations);
+            refreshDataBtn.addEventListener('click', loadReservations);
+            saveConfigBtn.addEventListener('click', saveConfig);
+            closeModal.addEventListener('click', () => detailsModal.style.display = 'none');
+            confirmReservationBtn.addEventListener('click', confirmCurrentReservation);
+            cancelReservationBtn.addEventListener('click', cancelCurrentReservation);
+            processPaymentBtn.addEventListener('click', processPayment);
+            refundPaymentBtn.addEventListener('click', refundPayment);
+            
+            // Fermer la modal en cliquant à l'extérieur
+            window.addEventListener('click', (e) => {
+                if (e.target === detailsModal) {
+                    detailsModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Définir les dates par défaut pour les filtres
+        function setDefaultDates() {
+            const today = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(today.getDate() + 7);
+            
+            dateFrom.valueAsDate = today;
+            dateTo.valueAsDate = nextWeek;
+        }
+
+        // Fonction pour effectuer des appels API
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            if (!API_URL) {
+                showNotification('Veuillez configurer l\'URL de l\'API', 'error');
+                return null;
+            }
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                showNotification('Erreur lors de l\'appel API: ' + error.message, 'error');
+                return null;
+            }
+        }
+
+        // Charger les réservations depuis l'API
+        async function loadReservations() {
+            if (!API_URL || !API_KEY) {
+                showNotification('Veuillez configurer l\'API d\'abord', 'error');
+                return;
+            }
+            
+            showNotification('Chargement des réservations...', 'success');
+            
+            try {
+                // Construire les paramètres de requête
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: itemsPerPage,
+                    status: statusFilter.value !== 'all' ? statusFilter.value : '',
+                    dateFrom: dateFrom.value,
+                    dateTo: dateTo.value,
+                    search: searchInput.value
+                });
+                
+                const data = await apiCall(`/reservations?${params}`);
+                
+                if (data) {
+                    renderReservations(data.reservations);
+                    updateStats(data.stats);
+                    updatePagination(data.total, data.currentPage, data.totalPages);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors du chargement des réservations', 'error');
+            }
+        }
+
+        // Afficher les réservations dans le tableau
+        function renderReservations(reservations) {
+            reservationsBody.innerHTML = '';
+            
+            if (!reservations || reservations.length === 0) {
+                reservationsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px;">Aucune réservation trouvée</td></tr>';
+                return;
+            }
+            
+            reservations.forEach(reservation => {
+                const row = document.createElement('tr');
+                
+                // Déterminer la classe de statut
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(reservation.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = 'En attente';
+                        break;
+                    case 'confirmed':
+                        statusClass = 'status-confirmed';
+                        statusText = 'Confirmé';
+                        break;
+                    case 'cancelled':
+                        statusClass = 'status-cancelled';
+                        statusText = 'Annulé';
+                        break;
+                    case 'paid':
+                        statusClass = 'status-paid';
+                        statusText = 'Payé';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>${reservation.id}</td>
+                    <td>${reservation.client}</td>
+                    <td>${reservation.email}<br>${reservation.phone}</td>
+                    <td>${formatDate(reservation.date)}</td>
+                    <td>${reservation.time}</td>
+                    <td>${reservation.guests}</td>
+                    <td>${reservation.amount} FCFA</td>
+                    <td><span class="status ${statusClass}">${statusText}</span></td>
+                    <td class="action-buttons">
+                        <button class="action-btn btn-primary view-btn" data-id="${reservation.id}">
+                            <i class="fas fa-eye"></i> Voir
+                        </button>
+                        ${reservation.status === 'pending' ? 
+                            `<button class="action-btn btn-success confirm-btn" data-id="${reservation.id}">
+                                <i class="fas fa-check"></i> Confirmer
+                             </button>
+                             <button class="action-btn btn-danger reject-btn" data-id="${reservation.id}">
+                                <i class="fas fa-times"></i> Refuser
+                             </button>` : 
+                            ''
+                        }
+                    </td>
+                `;
+                
+                reservationsBody.appendChild(row);
+            });
+            
+            // Ajouter les écouteurs d'événements pour les boutons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.view-btn').dataset.id;
+                    showReservationDetails(id);
+                });
+            });
+            
+            document.querySelectorAll('.confirm-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.confirm-btn').dataset.id;
+                    confirmReservation(id);
+                });
+            });
+            
+            document.querySelectorAll('.reject-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.reject-btn').dataset.id;
+                    rejectReservation(id);
+                });
+            });
+        }
+
+        // Formater la date au format français
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats(stats) {
+            if (!stats) return;
+            
+            totalReservations.textContent = stats.total || 0;
+            pendingReservations.textContent = stats.pending || 0;
+            confirmedReservations.textContent = stats.confirmed || 0;
+            cancelledReservations.textContent = stats.cancelled || 0;
+        }
+
+        // Mettre à jour la pagination
+        function updatePagination(totalItems, currentPage, totalPages) {
+            // Implémentation simplifiée de la pagination
+            const paginationContainer = document.querySelector('.pagination');
+            // Vous pouvez implémenter une logique de pagination plus complexe ici
+        }
+
+        // Afficher les détails d'une réservation
+        async function showReservationDetails(id) {
+            const reservation = await apiCall(`/reservations/${id}`);
+            
+            if (reservation) {
+                currentReservationId = id;
+                
+                let statusText = '';
+                switch(reservation.status) {
+                    case 'pending': statusText = 'En attente'; break;
+                    case 'confirmed': statusText = 'Confirmée'; break;
+                    case 'cancelled': statusText = 'Annulée'; break;
+                    case 'paid': statusText = 'Payée'; break;
+                }
+                
+                modalDetails.innerHTML = `
+                    <div class="detail-item">
+                        <div class="detail-label">ID</div>
+                        <div class="detail-value">${reservation.id}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Client</div>
+                        <div class="detail-value">${reservation.client}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">${reservation.email}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Téléphone</div>
+                        <div class="detail-value">${reservation.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value">${formatDate(reservation.date)} à ${reservation.time}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Nombre de personnes</div>
+                        <div class="detail-value">${reservation.guests}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Montant</div>
+                        <div class="detail-value">${reservation.amount} FCFA</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Statut</div>
+                        <div class="detail-value">${statusText}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Paiement</div>
+                        <div class="detail-value">${reservation.payment_status || 'Non payé'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Demandes spéciales</div>
+                        <div class="detail-value">${reservation.special_requests || 'Aucune'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Créée le</div>
+                        <div class="detail-value">${new Date(reservation.created_at).toLocaleString('fr-FR')}</div>
+                    </div>
+                `;
+                
+                // Afficher ou masquer les boutons selon le statut
+                if (reservation.status === 'pending') {
+                    confirmReservationBtn.style.display = 'flex';
+                    cancelReservationBtn.style.display = 'flex';
+                    processPaymentBtn.style.display = 'flex';
+                    refundPaymentBtn.style.display = 'none';
+                } else if (reservation.status === 'confirmed' || reservation.status === 'paid') {
+                    confirmReservationBtn.style.display = 'none';
+                    cancelReservationBtn.style.display = 'flex';
+                    processPaymentBtn.style.display = reservation.status === 'paid' ? 'none' : 'flex';
+                    refundPaymentBtn.style.display = reservation.status === 'paid' ? 'flex' : 'none';
+                } else {
+                    confirmReservationBtn.style.display = 'none';
+                    cancelReservationBtn.style.display = 'none';
+                    processPaymentBtn.style.display = 'none';
+                    refundPaymentBtn.style.display = 'none';
+                }
+                
+                detailsModal.style.display = 'flex';
+            }
+        }
+
+        // Confirmer une réservation
+        async function confirmReservation(id) {
+            const result = await apiCall(`/reservations/${id}/confirm`, 'PUT');
+            
+            if (result && result.success) {
+                showNotification('Réservation confirmée avec succès', 'success');
+                loadReservations();
+                
+                // Si la modal est ouverte, mettre à jour les détails
+                if (detailsModal.style.display === 'flex' && currentReservationId == id) {
+                    showReservationDetails(id);
+                }
+            }
+        }
+
+        // Refuser une réservation
+        async function rejectReservation(id) {
+            const result = await apiCall(`/reservations/${id}/reject`, 'PUT');
+            
+            if (result && result.success) {
+                showNotification('Réservation refusée avec succès', 'success');
+                loadReservations();
+                
+                // Si la modal est ouverte, mettre à jour les détails
+                if (detailsModal.style.display === 'flex' && currentReservationId == id) {
+                    showReservationDetails(id);
+                }
+            }
+        }
+
+        // Traiter un paiement avec FedaPay
+        async function processPayment() {
+            if (!currentReservationId) return;
+            
+            if (!FEDAPAY_PUBLIC_KEY) {
+                showNotification('Veuillez configurer la clé FedaPay', 'error');
+                return;
+            }
+            
+            // Récupérer les détails de la réservation
+            const reservation = await apiCall(`/reservations/${currentReservationId}`);
+            if (!reservation) return;
+            
+            showNotification('Initialisation du paiement FedaPay...', 'success');
+            
+            // Utiliser FedaPay pour traiter le paiement
+            FedaPay.init({
+                public_key: FEDAPAY_PUBLIC_KEY,
+                transaction: {
+                    amount: reservation.amount,
+                    description: `Réservation #${reservation.id} - ${reservation.client}`
+                },
+                callback: async function(result) {
+                    if (result.success) {
+                        // Mettre à jour le statut de la réservation
+                        const updateResult = await apiCall(`/reservations/${currentReservationId}/payment`, 'POST', {
+                            transaction_id: result.transaction.id,
+                            status: 'paid'
+                        });
+                        
+                        if (updateResult && updateResult.success) {
+                            showNotification('Paiement effectué avec succès', 'success');
+                            loadReservations();
+                            showReservationDetails(currentReservationId);
+                        } else {
+                            showNotification('Erreur lors de la mise à jour du statut', 'error');
+                        }
+                    } else {
+                        showNotification('Échec du paiement', 'error');
+                    }
+                }
+            });
+        }
+
+        // Effectuer un remboursement avec FedaPay
+        async function refundPayment() {
+            if (!currentReservationId) return;
+            
+            showNotification('Traitement du remboursement...', 'success');
+            
+            // Appeler l'API pour effectuer le remboursement
+            const result = await apiCall(`/reservations/${currentReservationId}/refund`, 'POST');
+            
+            if (result && result.success) {
+                showNotification('Remboursement effectué avec succès', 'success');
+                loadReservations();
+                showReservationDetails(currentReservationId);
+            } else {
+                showNotification('Erreur lors du remboursement', 'error');
+            }
+        }
+
+        // Confirmer la réservation courante (depuis la modal)
+        function confirmCurrentReservation() {
+            if (currentReservationId) {
+                confirmReservation(currentReservationId);
+            }
+        }
+
+        // Annuler la réservation courante (depuis la modal)
+        function cancelCurrentReservation() {
+            if (currentReservationId) {
+                rejectReservation(currentReservationId);
+            }
+        }
+
+        // Filtrer les réservations
+        function filterReservations() {
+            currentPage = 1;
+            loadReservations();
+        }
+
+        // Afficher une notification
+        function showNotification(message, type) {
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.classList.add('show');
+            notificationText.textContent = message;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

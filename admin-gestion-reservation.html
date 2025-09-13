@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion du Taux d'Occupation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #c19a6b;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 24px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Occupation Meter */
+        .occupation-meter {
+            margin: 20px 0;
+        }
+        
+        .meter-container {
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .meter-value {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .meter-status {
+            text-align: center;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .status-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-full {
+            background: #dc3545;
+            color: white;
+        }
+        
+        /* Reservation Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Calendar */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+        
+        .calendar-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 500;
+            padding: 5px;
+            color: var(--primary);
+        }
+        
+        .calendar-day {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            background: #f0f0f0;
+        }
+        
+        .calendar-day.current {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .calendar-day.occupied {
+            background: rgba(220, 53, 69, 0.1);
+        }
+        
+        .calendar-day.high {
+            background: rgba(255, 193, 7, 0.2);
+        }
+        
+        .calendar-day.full {
+            background: rgba(220, 53, 69, 0.3);
+        }
+        
+        .occupation-dot {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        .occupation-low {
+            background: var(--success);
+        }
+        
+        .occupation-medium {
+            background: var(--warning);
+        }
+        
+        .occupation-high {
+            background: var(--danger);
+        }
+        
+        /* Reservation List */
+        .reservation-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .reservation-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reservation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .reservation-info {
+            flex: 1;
+        }
+        
+        .reservation-name {
+            font-weight: 500;
+        }
+        
+        .reservation-details {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .reservation-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        /* Settings */
+        .settings-section {
+            margin-bottom: 20px;
+        }
+        
+        .settings-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-chart-pie"></i>
+                <h1>Gestion du Taux d'Occupation</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showSettings()">
+                    <i class="fas fa-cog"></i> Paramètres
+                </button>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Occupation en temps réel</div>
+                        <div id="last-update">15/12/2023 14:30</div>
+                    </div>
+                    
+                    <div class="occupation-meter">
+                        <div class="meter-value" id="occupation-value">72%</div>
+                        <div class="meter-container">
+                            <div class="meter-fill" id="occupation-meter" style="width: 72%; background-color: #ffc107;"></div>
+                        </div>
+                        <div class="meter-labels">
+                            <span>0%</span>
+                            <span id="current-occupation">36/50</span>
+                            <span>100%</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span class="meter-status status-medium" id="occupation-status">Occupation moyenne</span>
+                        </div>
+                    </div>
+                    
+                    <div id="occupation-alert"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Calendrier d'occupation</div>
+                    </div>
+                    
+                    <div class="calendar-header">
+                        <button class="btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <div id="current-month">Décembre 2023</div>
+                        <button class="btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Lun</div>
+                        <div class="calendar-weekday">Mar</div>
+                        <div class="calendar-weekday">Mer</div>
+                        <div class="calendar-weekday">Jeu</div>
+                        <div class="calendar-weekday">Ven</div>
+                        <div class="calendar-weekday">Sam</div>
+                        <div class="calendar-weekday">Dim</div>
+                    </div>
+                    
+                    <div class="calendar" id="calendar-days">
+                        <!-- Les jours du calendrier seront générés par JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Nouvelle réservation</div>
+                    </div>
+                    
+                    <form id="reservation-form">
+                        <div class="form-group">
+                            <label for="client-name">Nom du client</label>
+                            <input type="text" id="client-name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="client-phone">Téléphone</label>
+                            <input type="tel" id="client-phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reservation-date">Date</label>
+                            <input type="date" id="reservation-date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reservation-time">Heure</label>
+                            <select id="reservation-time" required>
+                                <option value="12:00">12:00</option>
+                                <option value="12:30">12:30</option>
+                                <option value="13:00">13:00</option>
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="19:00">19:00</option>
+                                <option value="19:30">19:30</option>
+                                <option value="20:00">20:00</option>
+                                <option value="20:30">20:30</option>
+                                <option value="21:00">21:00</option>
+                                <option value="21:30">21:30</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="guest-count">Nombre de personnes</label>
+                            <input type="number" id="guest-count" min="1" max="20" value="2" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn" onclick="checkAvailability()">
+                                <i class="fas fa-search"></i> Vérifier disponibilité
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Confirmer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Réservations aujourd'hui</div>
+                        <button class="btn" onclick="refreshReservations()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="reservation-list" id="reservation-list">
+                        <!-- Les réservations seront chargées par JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Paramètres -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Paramètres d'occupation</div>
+                <button class="modal-close" onclick="closeModal('settings-modal')">&times;</button>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Capacité du restaurant</h3>
+                <div class="form-group">
+                    <label for="max-capacity">Capacité maximale</label>
+                    <input type="number" id="max-capacity" min="10" max="500" value="50">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max-reservations">Réservations simultanées maximales</label>
+                    <input type="number" id="max-reservations" min="1" max="100" value="40">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Seuils d'alerte</h3>
+                <div class="form-group">
+                    <label for="warning-threshold">Seuil d'avertissement (%)</label>
+                    <input type="number" id="warning-threshold" min="1" max="100" value="70">
+                </div>
+                
+                <div class="form-group">
+                    <label for="danger-threshold">Seuil de danger (%)</label>
+                    <input type="number" id="danger-threshold" min="1" max="100" value="90">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Options de réservation</h3>
+                <div class="toggle-label">
+                    <span>Refuser automatiquement les réservations lorsque complet</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-reject" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-label">
+                    <span>Notifications par email</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="email-notifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn" onclick="closeModal('settings-modal')">Annuler</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données simulées pour la démonstration
+        let restaurantSettings = {
+            maxCapacity: 50,
+            maxReservations: 40,
+            warningThreshold: 70,
+            dangerThreshold: 90,
+            autoReject: true,
+            emailNotifications: true
+        };
+        
+        let currentReservations = [
+            { id: 1, name: "Jean Dupont", phone: "0123456789", date: "2023-12-15", time: "20:00", guests: 4 },
+            { id: 2, name: "Marie Martin", phone: "0987654321", date: "2023-12-15", time: "20:30", guests: 2 },
+            { id: 3, name: "Paul Durand", phone: "0654321789", date: "2023-12-15", time: "21:00", guests: 6 },
+            { id: 4, name: "Sophie Lambert", phone: "0678912345", date: "2023-12-15", time: "19:30", guests: 3 }
+        ];
+        
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOccupationDisplay();
+            generateCalendar();
+            loadReservations();
+            updateDateTime();
+            
+            // Mettre à jour la date/heure toutes les minutes
+            setInterval(updateDateTime, 60000);
+            
+            // Écouteur pour le formulaire de réservation
+            document.getElementById('reservation-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addReservation();
+            });
+            
+            // Définir la date minimale pour la réservation (aujourd'hui)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reservation-date').setAttribute('min', today);
+        });
+        
+        // Mettre à jour l'affichage de l'occupation
+        function updateOccupationDisplay() {
+            const totalGuests = currentReservations.reduce((sum, res) => sum + res.guests, 0);
+            const occupationRate = Math.min(100, Math.round((totalGuests / restaurantSettings.maxCapacity) * 100));
+            
+            document.getElementById('occupation-value').textContent = occupationRate + '%';
+            document.getElementById('occupation-meter').style.width = occupationRate + '%';
+            document.getElementById('current-occupation').textContent = totalGuests + '/' + restaurantSettings.maxCapacity;
+            
+            // Changer la couleur en fonction du taux d'occupation
+            const meter = document.getElementById('occupation-meter');
+            const status = document.getElementById('occupation-status');
+            
+            if (occupationRate < restaurantSettings.warningThreshold) {
+                meter.style.backgroundColor = '#28a745';
+                status.className = 'meter-status status-low';
+                status.textContent = 'Faible occupation';
+                document.getElementById('occupation-alert').innerHTML = '';
+            } 
+            else if (occupationRate < restaurantSettings.dangerThreshold) {
+                meter.style.backgroundColor = '#ffc107';
+                status.className = 'meter-status status-medium';
+                status.textContent = 'Occupation moyenne';
+                document.getElementById('occupation-alert').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>Le restaurant approche de sa capacité maximale. ${restaurantSettings.maxCapacity - totalGuests} places restantes.</div>
+                    </div>
+                `;
+            } 
+            else {
+                meter.style.backgroundColor = '#dc3545';
+                status.className = 'meter-status status-high';
+                status.textContent = 'Forte occupation';
+                document.getElementById('occupation-alert').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>Le restaurant est presque complet. ${restaurantSettings.maxCapacity - totalGuests} places restantes.</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Générer le calendrier
+        function generateCalendar() {
+            const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            document.getElementById('current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay();
+            
+            // Ajuster le premier jour (Lundi = 1, Dimanche = 0)
+            let startDate = startingDay === 0 ? 6 : startingDay - 1;
+            
+            let calendarHTML = '';
+            
+            // Jours vides du mois précédent
+            for (let i = 0; i < startDate; i++) {
+                calendarHTML += `<div class="calendar-day"></div>`;
+            }
+            
+            // Jours du mois en cours
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const dayReservations = currentReservations.filter(r => r.date === dateStr);
+                const totalGuests = dayReservations.reduce((sum, res) => sum + res.guests, 0);
+                const occupationRate = Math.round((totalGuests / restaurantSettings.maxCapacity) * 100);
+                
+                let dayClass = 'calendar-day';
+                let occupationClass = '';
+                
+                // Vérifier si c'est aujourd'hui
+                if (currentYear === today.getFullYear() && currentMonth === today.getMonth() && i === today.getDate()) {
+                    dayClass += ' current';
+                }
+                
+                // Déterminer la classe d'occupation
+                if (occupationRate >= restaurantSettings.dangerThreshold) {
+                    dayClass += ' full';
+                    occupationClass = 'occupation-high';
+                } else if (occupationRate >= restaurantSettings.warningThreshold) {
+                    dayClass += ' high';
+                    occupationClass = 'occupation-medium';
+                } else if (occupationRate > 0) {
+                    dayClass += ' occupied';
+                    occupationClass = 'occupation-low';
+                }
+                
+                calendarHTML += `
+                    <div class="${dayClass}" onclick="viewDayReservations('${dateStr}')">
+                        ${i}
+                        ${occupationClass ? `<div class="occupation-dot ${occupationClass}"></div>` : ''}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('calendar-days').innerHTML = calendarHTML;
+        }
+        
+        // Changer de mois
+        function changeMonth(direction) {
+            currentMonth += direction;
+            
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            
+            generateCalendar();
+        }
+        
+        // Charger les réservations
+        function loadReservations() {
+            const reservationList = document.getElementById('reservation-list');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const todaysReservations = currentReservations.filter(r => r.date === today);
+            
+            if (todaysReservations.length === 0) {
+                reservationList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--gray);">Aucune réservation aujourd\'hui</div>';
+                return;
+            }
+            
+            let reservationsHTML = '';
+            todaysReservations.forEach(res => {
+                reservationsHTML += `
+                    <div class="reservation-item">
+                        <div class="reservation-info">
+                            <div class="reservation-name">${res.name}</div>
+                            <div class="reservation-details">${res.time} • ${res.guests} personne(s)</div>
+                        </div>
+                        <div class="reservation-actions">
+                            <button class="btn" onclick="editReservation(${res.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn" onclick="cancelReservation(${res.id})"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reservationList.innerHTML = reservationsHTML;
+        }
+        
+        // Rafraîchir les réservations
+        function refreshReservations() {
+            loadReservations();
+            updateOccupationDisplay();
+            
+            // Simuler une notification
+            showNotification('Liste actualisée', 'Les réservations ont été mises à jour.', 'success');
+        }
+        
+        // Vérifier la disponibilité
+        function checkAvailability() {
+            const date = document.getElementById('reservation-date').value;
+            const time = document.getElementById('reservation-time').value;
+            const guests = parseInt(document.getElementById('guest-count').value);
+            
+            if (!date) {
+                showNotification('Erreur', 'Veuillez sélectionner une date.', 'error');
+                return;
+            }
+            
+            // Simuler une vérification de disponibilité
+            const existingReservations = currentReservations.filter(r => r.date === date && r.time === time);
+            const totalGuests = existingReservations.reduce((sum, res) => sum + res.guests, 0);
+            const availableSpace = restaurantSettings.maxCapacity - totalGuests;
+            
+            if (availableSpace >= guests) {
+                showNotification('Disponible', `${guests} place(s) disponible(s) à ${time} le ${formatDate(date)}.`, 'success');
+            } else {
+                showNotification('Complet', `Seulement ${availableSpace} place(s) disponible(s) à ${time} le ${formatDate(date)}.`, 'error');
+            }
+        }
+        
+        // Ajouter une réservation
+        function addReservation() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const date = document.getElementById('reservation-date').value;
+            const time = document.getElementById('reservation-time').value;
+            const guests = parseInt(document.getElementById('guest-count').value);
+            
+            if (!name || !phone || !date || !time) {
+                showNotification('Erreur', 'Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+            
+            // Vérifier la capacité
+            const existingReservations = currentReservations.filter(r => r.date === date && r.time === time);
+            const totalGuests = existingReservations.reduce((sum, res) => sum + res.guests, 0);
+            
+            if (totalGuests + guests > restaurantSettings.maxCapacity) {
+                showNotification('Capacité dépassée', `Il ne reste que ${restaurantSettings.maxCapacity - totalGuests} place(s) à ${time} le ${formatDate(date)}.`, 'error');
+                return;
+            }
+            
+            // Ajouter la réservation
+            const newReservation = {
+                id: currentReservations.length + 1,
+                name,
+                phone,
+                date,
+                time,
+                guests
+            };
+            
+            currentReservations.push(newReservation);
+            
+            // Réinitialiser le formulaire
+            document.getElementById('reservation-form').reset();
+            
+            // Mettre à jour l'affichage
+            updateOccupationDisplay();
+            generateCalendar();
+            loadReservations();
+            
+            showNotification('Réservation confirmée', `La réservation pour ${name} a été ajoutée.`, 'success');
+        }
+        
+        // Annuler une réservation
+        function cancelReservation(id) {
+            if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                currentReservations = currentReservations.filter(r => r.id !== id);
+                updateOccupationDisplay();
+                generateCalendar();
+                loadReservations();
+                
+                showNotification('Réservation annulée', 'La réservation a été annulée avec succès.', 'success');
+            }
+        }
+        
+        // Afficher les paramètres
+        function showSettings() {
+            document.getElementById('max-capacity').value = restaurantSettings.maxCapacity;
+            document.getElementById('max-reservations').value = restaurantSettings.maxReservations;
+            document.getElementById('warning-threshold').value = restaurantSettings.warningThreshold;
+            document.getElementById('danger-threshold').value = restaurantSettings.dangerThreshold;
+            document.getElementById('auto-reject').checked = restaurantSettings.autoReject;
+            document.getElementById('email-notifications').checked = restaurantSettings.emailNotifications;
+            
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+        
+        // Fermer la modale
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Sauvegarder les paramètres
+        function saveSettings() {
+            restaurantSettings.maxCapacity = parseInt(document.getElementById('max-capacity').value);
+            restaurantSettings.maxReservations = parseInt(document.getElementById('max-reservations').value);
+            restaurantSettings.warningThreshold = parseInt(document.getElementById('warning-threshold').value);
+            restaurantSettings.dangerThreshold = parseInt(document.getElementById('danger-threshold').value);
+            restaurantSettings.autoReject = document.getElementById('auto-reject').checked;
+            restaurantSettings.emailNotifications = document.getElementById('email-notifications').checked;
+            
+            updateOccupationDisplay();
+            generateCalendar();
+            closeModal('settings-modal');
+            
+            showNotification('Paramètres sauvegardés', 'Les paramètres ont été mis à jour avec succès.', 'success');
+        }
+        
+        // Afficher les réservations d'un jour
+        function viewDayReservations(dateStr) {
+            alert(`Voir les réservations du ${formatDate(dateStr)}`);
+            // Implémenter la logique pour afficher les réservations d'une journée spécifique
+        }
+        
+        // Formater une date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        
+        // Mettre à jour la date et l'heure
+        function updateDateTime() {
+            const now = new Date();
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('last-update').textContent = now.toLocaleDateString('fr-FR', options);
+        }
+        
+        // Afficher une notification
+        function showNotification(title, message, type) {
+            // Implémenter un système de notifications toast
+            alert(`${title}: ${message}`);
+        }
+        
+        // Éditer une réservation
+        function editReservation(id) {
+            const reservation = currentReservations.find(r => r.id === id);
+            if (reservation) {
+                document.getElementById('client-name').value = reservation.name;
+                document.getElementById('client-phone').value = reservation.phone;
+                document.getElementById('reservation-date').value = reservation.date;
+                document.getElementById('reservation-time').value = reservation.time;
+                document.getElementById('guest-count').value = reservation.guests;
+                
+                // Faire défiler jusqu'au formulaire
+                document.getElementById('reservation-form').scrollIntoView({ behavior: 'smooth' });
+                
+                // Supprimer l'ancienne réservation
+                currentReservations = currentReservations.filter(r => r.id !== id);
+                updateOccupationDisplay();
+                loadReservations();
+                
+                showNotification('Modification', 'Vous pouvez modifier la réservation.', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

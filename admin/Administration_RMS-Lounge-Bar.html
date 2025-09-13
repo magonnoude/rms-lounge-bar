@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration RMS Lounge Bar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #c19a6b;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--primary);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .sidebar-header h2 {
+            margin-top: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu li {
+            padding: 10px 20px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu li.active {
+            border-left-color: var(--secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .sidebar-menu li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* Sections */
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* Dashboard Styles */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .stat-card i {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        
+        .stat-card .icon-reservation {
+            color: var(--primary);
+        }
+        
+        .stat-card .icon-contact {
+            color: var(--secondary);
+        }
+        
+        .stat-card .icon-confirmed {
+            color: var(--success);
+        }
+        
+        .stat-card .icon-pending {
+            color: var(--warning);
+        }
+        
+        .stat-info h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Occupation Meter */
+        .occupation-meter {
+            margin: 20px 0;
+        }
+        
+        .meter-container {
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .meter-value {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .meter-status {
+            text-align: center;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .status-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-width: 150px;
+        }
+        
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-read {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-unread {
+            background-color: #fef3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-view {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-reply {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: var(--primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-detail {
+            margin-bottom: 15px;
+        }
+        
+        .modal-detail label {
+            display: block;
+            font-weight: 500;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        
+        .modal-detail p {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin: 0;
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification-success {
+            background: var(--success);
+        }
+        
+        .notification-error {
+            background: var(--danger);
+        }
+        
+        .notification-warning {
+            background: var(--warning);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .sidebar-menu li {
+                border-left: none;
+                border-bottom: 4px solid transparent;
+                padding: 10px 15px;
+            }
+            
+            .sidebar-menu li.active {
+                border-left: none;
+                border-bottom-color: var(--secondary);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .filter-group select, .filter-group input {
+                width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 700px;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-utensils"></i> RMS Lounge Bar</h2>
+                <p>Espace Administrateur</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" data-section="dashboard"><a href="#"><i class="fas fa-home"></i> Tableau de bord</a></li>
+                <li data-section="reservations"><a href="#"><i class="fas fa-calendar-alt"></i> Réservations</a></li>
+                <li data-section="occupation"><a href="#"><i class="fas fa-chart-pie"></i> Taux d'occupation</a></li>
+                <li data-section="messages"><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li data-section="settings"><a href="#"><i class="fas fa-cog"></i> Paramètres</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Tableau de bord</h1>
+                <div class="user-info">
+                    <div class="user-avatar">AD</div>
+                    <div>
+                        <div>Admin User</div>
+                        <small>Administrateur</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <!-- Stats Cards -->
+                <div class="stats-cards">
+                    <div class="card stat-card">
+                        <div class="stat-info">
+                            <h3 id="total-reservations">42</h3>
+                            <p>Réservations aujourd'hui</p>
+                        </div>
+                        <i class="fas fa-calendar-check icon-reservation"></i>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-info">
+                            <h3 id="total-messages">18</h3>
+                            <p>Messages non lus</p>
+                        </div>
+                        <i class="fas fa-envelope icon-contact"></i>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-info">
+                            <h3 id="confirmed-reservations">35</h3>
+                            <p>Confirmées</p>
+                        </div>
+                        <i class="fas fa-check-circle icon-confirmed"></i>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-info">
+                            <h3 id="pending-reservations">7</h3>
+                            <p>En attente</p>
+                        </div>
+                        <i class="fas fa-clock icon-pending"></i>
+                    </div>
+                </div>
+
+                <!-- Occupation Meter -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Occupation en temps réel</div>
+                        <div id="last-update">15/12/2023 14:30</div>
+                    </div>
+                    
+                    <div class="occupation-meter">
+                        <div class="meter-value" id="occupation-value">72%</div>
+                        <div class="meter-container">
+                            <div class="meter-fill" id="occupation-meter" style="width: 72%; background-color: #ffc107;"></div>
+                        </div>
+                        <div class="meter-labels">
+                            <span>0%</span>
+                            <span id="current-occupation">36/50</span>
+                            <span>100%</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span class="meter-status status-medium" id="occupation-status">Occupation moyenne</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filterType">Type</label>
+                        <select id="filterType">
+                            <option value="all">Tous</option>
+                            <option value="reservation">Réservations</option>
+                            <option value="contact">Messages</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterStatus">Statut</label>
+                        <select id="filterStatus">
+                            <option value="all">Tous</option>
+                            <option value="pending">En attente</option>
+                            <option value="confirmed">Confirmé</option>
+                            <option value="cancelled">Annulé</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDate">Date</label>
+                        <input type="date" id="filterDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="search">Recherche</label>
+                        <input type="text" id="search" placeholder="Nom, email...">
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                                <th>Personnes</th>
+                                <th>Heure</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationsTable">
+                            <!-- Les données seront chargées dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Occupation Section -->
+            <div id="occupation" class="section">
+                <h2>Gestion du taux d'occupation</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Nouvelle réservation</div>
+                    </div>
+                    
+                    <form id="reservation-form">
+                        <div class="form-group">
+                            <label for="client-name">Nom du client</label>
+                            <input type="text" id="client-name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="client-phone">Téléphone</label>
+                            <input type="tel" id="client-phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reservation-date">Date</label>
+                            <input type="date" id="reservation-date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reservation-time">Heure</label>
+                            <select id="reservation-time" required>
+                                <option value="12:00">12:00</option>
+                                <option value="12:30">12:30</option>
+                                <option value="13:00">13:00</option>
+                                <option value="13:30">13:30</option>
+                                <option value="14:00">14:00</option>
+                                <option value="14:30">14:30</option>
+                                <option value="19:00">19:00</option>
+                                <option value="19:30">19:30</option>
+                                <option value="20:00">20:00</option>
+                                <option value="20:30">20:30</option>
+                                <option value="21:00">21:00</option>
+                                <option value="21:30">21:30</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="guest-count">Nombre de personnes</label>
+                            <input type="number" id="guest-count" min="1" max="20" value="2" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-view" onclick="checkAvailability()">
+                                <i class="fas fa-search"></i> Vérifier disponibilité
+                            </button>
+                            <button type="submit" class="btn btn-confirm">
+                                <i class="fas fa-check"></i> Confirmer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Réservations aujourd'hui</div>
+                        <button class="btn btn-view" onclick="refreshReservations()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="reservation-list" id="reservation-list">
+                        <!-- Les réservations seront chargées dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Section -->
+            <div id="messages" class="section">
+                <h2>Messages des clients</h2>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="messageStatus">Statut</label>
+                        <select id="messageStatus">
+                            <option value="all">Tous</option>
+                            <option value="unread">Non lus</option>
+                            <option value="read">Lus</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="messageSearch">Recherche</label>
+                        <input type="text" id="messageSearch" placeholder="Nom, email, sujet...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Sujet</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTable">
+                            <!-- Les messages seront chargés dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="section">
+                <h2>Paramètres du restaurant</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Paramètres d'occupation</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="max-capacity">Capacité maximale</label>
+                        <input type="number" id="max-capacity" min="10" max="500" value="50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="max-reservations">Réservations simultanées maximales</label>
+                        <input type="number" id="max-reservations" min="1" max="100" value="40">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="warning-threshold">Seuil d'avertissement (%)</label>
+                        <input type="number" id="warning-threshold" min="1" max="100" value="70">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="danger-threshold">Seuil de danger (%)</label>
+                        <input type="number" id="danger-threshold" min="1" max="100" value="90">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <span>Refuser automatiquement les réservations lorsque complet</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="auto-reject" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <span>Notifications par email</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-notifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    
+                    <button class="btn btn-confirm" onclick="saveSettings()">Enregistrer les paramètres</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Détails de la réservation</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-detail">
+                    <label>Date et heure</label>
+                    <p id="modal-date"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Nom</label>
+                    <p id="modal-name"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Email</label>
+                    <p id="modal-email"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Téléphone</label>
+                    <p id="modal-phone"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Nombre de personnes</label>
+                    <p id="modal-guests"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Statut</label>
+                    <p id="modal-status"></p>
+                </div>
+                <div class="modal-detail">
+                    <label>Message</label>
+                    <p id="modal-message"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification notification-success" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <div id="notification-title">Succès</div>
+            <div id="notification-message">Opération effectuée avec succès</div>
+        </div>
+    </div>
+
+    <script>
+        // Données simulées (seront remplacées par des appels API)
+        let restaurantSettings = {
+            maxCapacity: 50,
+            maxReservations: 40,
+            warningThreshold: 70,
+            dangerThreshold: 90,
+            autoReject: true,
+            emailNotifications: true
+        };
+        
+        let currentReservations = [
+            { id: 1, name: "Jean Dupont", email: "jean.dupont@email.com", phone: "0123456789", date: new Date().toISOString().split('T')[0], time: "20:00", guests: 4, status: "pending", message: "Je souhaite une table près de la fenêtre s'il vous plaît." },
+            { id: 2, name: "Marie Martin", email: "marie.martin@email.com", phone: "0987654321", date: new Date().toISOString().split('T')[0], time: "20:30", guests: 2, status: "confirmed", message: "Anniversaire de mariage" },
+            { id: 3, name: "Paul Durand", email: "paul.durand@email.com", phone: "0654321789", date: new Date().toISOString().split('T')[0], time: "21:00", guests: 6, status: "pending", message: "Dîner d'affaires" }
+        ];
+        
+        let messages = [
+            { id: 1, date: "2023-11-28", name: "Sophie Martin", email: "sophie.martin@email.com", subject: "Question sur les allergies", message: "Bonjour, je souhaiterais réserver une table pour 4 personnes le 15 décembre. Cependant, l'un des convives a une allergie aux fruits de mer. Est-il possible d'adapter le menu en conséquence ? Merci de votre réponse.", status: "unread" },
+            { id: 2, date: "2023-11-27", name: "Luc Tremblay", email: "luc.tremblay@email.com", subject: "Événement d'entreprise", message: "Bonjour, nous souhaitons organiser un événement d'entreprise pour 25 personnes. Quelles sont les possibilités et disponibilités pour la première quinzaine de janvier ?", status: "read" }
+        ];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            loadReservationsTable();
+            loadMessagesTable();
+            updateDateTime();
+            
+            // Mettre à jour la date/heure toutes les minutes
+            setInterval(updateDateTime, 60000);
+            
+            // Écouteur pour le formulaire de réservation
+            document.getElementById('reservation-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addReservation();
+            });
+            
+            // Définir la date minimale pour la réservation (aujourd'hui)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reservation-date').setAttribute('min', today);
+            document.getElementById('filterDate').value = today;
+        });
+        
+        // Navigation entre les sections
+        document.querySelectorAll('.sidebar-menu li').forEach(item => {
+            if (item.dataset.section) {
+                item.addEventListener('click', () => {
+                    // Mettre à jour le menu
+                    document.querySelectorAll('.sidebar-menu li').forEach(li => {
+                        li.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // Afficher la section correspondante
+                    document.querySelectorAll('.section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(item.dataset.section).classList.add('active');
+                    
+                    // Mettre à jour le titre de la page
+                    document.getElementById('pageTitle').textContent = item.querySelector('a').textContent.trim();
+                    
+                    // Charger les données spécifiques à la section
+                    if (item.dataset.section === 'reservations') {
+                        loadReservationsTable();
+                    } else if (item.dataset.section === 'messages') {
+                        loadMessagesTable();
+                    } else if (item.dataset.section === 'occupation') {
+                        updateOccupationDisplay();
+                    }
+                });
+            }
+        });
+        
+        // Charger les données du tableau de bord
+        function loadDashboardData() {
+            // Simuler des données (seront remplacées par des appels API)
+            document.getElementById('total-reservations').textContent = currentReservations.length;
+            document.getElementById('confirmed-reservations').textContent = currentReservations.filter(r => r.status === 'confirmed').length;
+            document.getElementById('pending-reservations').textContent = currentReservations.filter(r => r.status === 'pending').length;
+            document.getElementById('total-messages').textContent = messages.filter(m => m.status === 'unread').length;
+            
+            updateOccupationDisplay();
+        }
+        
+        // Charger le tableau des réservations
+        function loadReservationsTable() {
+            const table = document.getElementById('reservationsTable');
+            let html = '';
+            
+            currentReservations.forEach(res => {
+                const date = new Date(res.date);
+                const formattedDate = date.toLocaleDateString('fr-FR');
+                
+                html += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${res.name}</td>
+                        <td>${res.email}</td>
+                        <td>${res.phone}</td>
+                        <td>${res.guests}</td>
+                        <td>${res.time}</td>
+                        <td><span class="status status-${res.status}">${res.status === 'pending' ? 'En attente' : (res.status === 'confirmed' ? 'Confirmé' : 'Annulé')}</span></td>
+                        <td>
+                            ${res.status === 'pending' ? `<button class="btn btn-sm btn-confirm" onclick="updateStatus(${res.id}, 'confirmed')">Confirmer</button>` : ''}
+                            ${res.status !== 'cancelled' ? `<button class="btn btn-sm btn-cancel" onclick="updateStatus(${res.id}, 'cancelled')">Annuler</button>` : ''}
+                            <button class="btn btn-sm btn-view" onclick="viewDetails(${res.id})">Détails</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            table.innerHTML = html;
+        }
+        
+        // Charger le tableau des messages
+        function loadMessagesTable() {
+            const table = document.getElementById('messagesTable');
+            let html = '';
+            
+            messages.forEach(msg => {
+                const date = new Date(msg.date);
+                const formattedDate = date.toLocaleDateString('fr-FR');
+                
+                html += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${msg.name}</td>
+                        <td>${msg.email}</td>
+                        <td>${msg.subject}</td>
+                        <td><span class="status status-${msg.status}">${msg.status === 'unread' ? 'Non lu' : 'Lu'}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-view" onclick="viewMessage(${msg.id})">Voir</button>
+                            <button class="btn btn-sm btn-reply" onclick="replyMessage(${msg.id})">Répondre</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            table.innerHTML = html;
+        }
+        
+        // Mettre à jour le statut d'une réservation
+        function updateStatus(id, status) {
+            const reservation = currentReservations.find(r => r.id === id);
+            if (reservation) {
+                reservation.status = status;
+                loadReservationsTable();
+                showNotification('Succès', `Réservation ${status === 'confirmed' ? 'confirmée' : 'annulée'} avec succès.`, 'success');
+            }
+        }
+        
+        // Afficher les détails d'une réservation
+        function viewDetails(id) {
+            const reservation = currentReservations.find(r => r.id === id);
+            if (reservation) {
+                const date = new Date(reservation.date);
+                const formattedDate = date.toLocaleDateString('fr-FR');
+                
+                document.getElementById('modal-date').textContent = `${formattedDate} à ${reservation.time}`;
+                document.getElementById('modal-name').textContent = reservation.name;
+                document.getElementById('modal-email').textContent = reservation.email;
+                document.getElementById('modal-phone').textContent = reservation.phone;
+                document.getElementById('modal-guests').textContent = reservation.guests;
+                document.getElementById('modal-status').textContent = reservation.status === 'pending' ? 'En attente' : (reservation.status === 'confirmed' ? 'Confirmé' : 'Annulé');
+                document.getElementById('modal-message').textContent = reservation.message || 'Aucun message spécifique';
+                
+                document.getElementById('detailsModal').style.display = 'flex';
+            }
+        }
+        
+        // Fermer la modal
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+        
+        // Afficher un message
+        function viewMessage(id) {
+            const message = messages.find(m => m.id === id);
+            if (message) {
+                // Marquer comme lu
+                message.status = 'read';
+                loadMessagesTable();
+                
+                // Afficher les détails (simplifié pour l'exemple)
+                alert(`Message de: ${message.name} (${message.email})\n\nSujet: ${message.subject}\n\n${message.message}`);
+            }
+        }
+        
+        // Répondre à un message
+        function replyMessage(id) {
+            const message = messages.find(m => m.id === id);
+            if (message) {
+                // Simuler l'ouverture du client de messagerie
+                const subject = `RE: ${message.subject}`;
+                const body = `\n\n--------------------------------\nMessage original:\nDe: ${message.name} (${message.email})\n${message.message}`;
+                
+                window.location.href = `mailto:${message.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            }
+        }
+        
+        // Mettre à jour l'affichage de l'occupation
+        function updateOccupationDisplay() {
+            const totalGuests = currentReservations
+                .filter(r => r.status === 'confirmed')
+                .reduce((sum, res) => sum + res.guests, 0);
+            
+            const percentage = Math.min(100, Math.round((totalGuests / restaurantSettings.maxCapacity) * 100));
+            
+            document.getElementById('occupation-value').textContent = `${percentage}%`;
+            document.getElementById('occupation-meter').style.width = `${percentage}%`;
+            document.getElementById('current-occupation').textContent = `${totalGuests}/${restaurantSettings.maxCapacity}`;
+            
+            // Changer la couleur en fonction du pourcentage
+            let statusText = 'Occupation faible';
+            let statusClass = 'status-low';
+            let color = '#28a745';
+            
+            if (percentage >= restaurantSettings.dangerThreshold) {
+                statusText = 'Occupation élevée';
+                statusClass = 'status-high';
+                color = '#dc3545';
+            } else if (percentage >= restaurantSettings.warningThreshold) {
+                statusText = 'Occupation moyenne';
+                statusClass = 'status-medium';
+                color = '#ffc107';
+            }
+            
+            document.getElementById('occupation-meter').style.backgroundColor = color;
+            document.getElementById('occupation-status').textContent = statusText;
+            document.getElementById('occupation-status').className = `meter-status ${statusClass}`;
+        }
+        
+        // Ajouter une réservation
+        function addReservation() {
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const date = document.getElementById('reservation-date').value;
+            const time = document.getElementById('reservation-time').value;
+            const guests = parseInt(document.getElementById('guest-count').value);
+            
+            const newReservation = {
+                id: currentReservations.length + 1,
+                name,
+                email: '',
+                phone,
+                date,
+                time,
+                guests,
+                status: 'confirmed',
+                message: ''
+            };
+            
+            currentReservations.push(newReservation);
+            
+            // Réinitialiser le formulaire
+            document.getElementById('reservation-form').reset();
+            
+            // Mettre à jour l'affichage
+            updateOccupationDisplay();
+            showNotification('Succès', 'Réservation ajoutée avec succès.', 'success');
+        }
+        
+        // Vérifier la disponibilité
+        function checkAvailability() {
+            const date = document.getElementById('reservation-date').value;
+            const time = document.getElementById('reservation-time').value;
+            const guests = parseInt(document.getElementById('guest-count').value);
+            
+            // Simuler une vérification de disponibilité
+            const totalGuestsAtTime = currentReservations
+                .filter(r => r.date === date && r.time === time && r.status === 'confirmed')
+                .reduce((sum, res) => sum + res.guests, 0);
+            
+            const available = (totalGuestsAtTime + guests) <= restaurantSettings.maxCapacity;
+            
+            if (available) {
+                showNotification('Disponible', `Il y a de la place pour ${guests} personnes à ${time}.`, 'success');
+            } else {
+                showNotification('Complet', `Désolé, plus de place pour ${guests} personnes à ${time}.`, 'error');
+            }
+        }
+        
+        // Sauvegarder les paramètres
+        function saveSettings() {
+            restaurantSettings.maxCapacity = parseInt(document.getElementById('max-capacity').value);
+            restaurantSettings.maxReservations = parseInt(document.getElementById('max-reservations').value);
+            restaurantSettings.warningThreshold = parseInt(document.getElementById('warning-threshold').value);
+            restaurantSettings.dangerThreshold = parseInt(document.getElementById('danger-threshold').value);
+            restaurantSettings.autoReject = document.getElementById('auto-reject').checked;
+            restaurantSettings.emailNotifications = document.getElementById('email-notifications').checked;
+            
+            updateOccupationDisplay();
+            showNotification('Succès', 'Paramètres enregistrés avec succès.', 'success');
+        }
+        
+        // Rafraîchir les réservations
+        function refreshReservations() {
+            // Simuler un rafraîchissement des données
+            showNotification('Info', 'Réservations rafraîchies.', 'warning');
+        }
+        
+        // Afficher une notification
+        function showNotification(title, message, type) {
+            const notification = document.getElementById('notification');
+            notification.className = `notification notification-${type}`;
+            document.getElementById('notification-title').textContent = title;
+            document.getElementById('notification-message').textContent = message;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Mettre à jour la date et l'heure
+        function updateDateTime() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const formattedTime = now.toLocaleTimeString('fr-FR');
+            
+            document.getElementById('last-update').textContent = `${formattedDate} ${formattedTime}`;
+        }
+    </script>
+</body>
+</html>

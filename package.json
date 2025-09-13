@@ -1,0 +1,13 @@
+{
+  "name": "RMS-Lounge-Bar-website",
+  "version": "1.0.0",
+  "description": "Site web du RMS Lounge Bar",
+  "scripts": {
+    "optimize-images": "node optimize-images.js",
+    "build": "npm run optimize-images",
+    "deploy": "npm run build && git add . && git commit -m 'Optimized images' && git push"
+  },
+  "devDependencies": {
+    "sharp": "^0.32.0"
+  }
+}
